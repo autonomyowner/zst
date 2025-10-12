@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AccessToken, VideoGrant } from "livekit-server-sdk";
+import { AccessToken, VideoGrant, TrackSource } from "livekit-server-sdk";
 
 export const runtime = "nodejs";
 export const revalidate = 0;
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     canPublish: true,
     canPublishData: true,
     canSubscribe: true,
-    canPublishSources: ['microphone', 'screen_share'],
+    canPublishSources: [TrackSource.MICROPHONE, TrackSource.SCREEN_SHARE],
   } as VideoGrant);
 
   return NextResponse.json(
