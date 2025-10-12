@@ -18,8 +18,13 @@ function SignupPageInner() {
     let mounted = true
     supabase?.auth.getSession().then(({ data }) => {
       if (!mounted) return
-      if (data.session) router.replace("/")
-      else setLoading(false)
+      if (data.session) {
+        // User is already logged in, redirect them
+        setStatus("You're already logged in! Redirecting...")
+        setTimeout(() => router.replace("/rooms"), 1000)
+      } else {
+        setLoading(false)
+      }
     })
     return () => { mounted = false }
   }, [router])
@@ -35,7 +40,25 @@ function SignupPageInner() {
   if (!supabaseConfigured) {
     return <div className="p-6 text-sm text-red-600">Supabase is not configured. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.</div>
   }
-  if (loading) return <div className="p-6 text-sm opacity-70">Checking session…</div>
+  if (loading) {
+    return (
+      <main className="relative min-h-screen flex items-center justify-center">
+        <div
+          aria-hidden
+          className="fixed inset-0 -z-10"
+          style={{
+            backgroundColor: '#fff8dc',
+            backgroundImage: 'radial-gradient(rgba(201,162,39,0.6) 1px, transparent 1px)',
+            backgroundSize: '36px 36px',
+            backgroundPosition: '0 0',
+          }}
+        />
+        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-6 text-slate-900">
+          <p className="text-sm opacity-70">{status || "Checking session…"}</p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="relative">

@@ -24,8 +24,9 @@ export default function AuthCallbackPage() {
         }
         // Optional: support redirect query param
         const url = new URL(window.location.href)
-        const redirect = url.searchParams.get("redirect") || "/"
-        router.replace(redirect)
+        const redirect = url.searchParams.get("redirect") || "/rooms"
+        setStatus("Successfully authenticated! Redirecting...")
+        setTimeout(() => router.replace(redirect), 500)
       } catch (err) {
         setStatus("Unexpected error during auth callback.")
       }
