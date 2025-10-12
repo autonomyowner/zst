@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LiveKitRoom, RoomAudioRenderer, ControlBar } from "@livekit/components-react";
+import { LiveKitRoom, RoomAudioRenderer, ControlBar, useParticipants, useTracks } from "@livekit/components-react";
 import type { RoomOptions } from "livekit-client";
+import { Track } from "livekit-client";
 import "@livekit/components-styles";
 
 export default function VoiceRoom({ 
@@ -39,6 +40,12 @@ export default function VoiceRoom({
       autoGainControl: true, 
       echoCancellation: true, 
       noiseSuppression: true 
+    },
+    // Ensure audio publishing is enabled for all participants
+    publishDefaults: {
+      audioPreset: {
+        maxBitrate: 20_000,
+      },
     },
   };
 
@@ -193,11 +200,14 @@ export default function VoiceRoom({
       <LiveKitRoom 
         token={token} 
         serverUrl={wsUrl} 
-        audio 
+        audio={true}
         video={false} 
-        connect 
+        connect={true}
         options={options}
         className="min-h-screen"
+        onConnected={() => {
+          console.log("Connected to room - audio should be enabled");
+        }}
       >
         <RoomAudioRenderer />
         
@@ -240,15 +250,19 @@ export default function VoiceRoom({
           </div>
         </section>
 
+        {/* Participants Display */}
+        <ParticipantsDisplay />
+
         {/* Instructions */}
         <section className="max-w-2xl mx-auto px-4">
           <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-6 space-y-4 text-slate-900">
             <h2 className="text-xl font-bold">How to use</h2>
             <ul className="list-disc pl-5 text-slate-800 space-y-1">
-              <li>Use the microphone button to mute/unmute your audio</li>
+              <li><strong>Everyone can talk!</strong> Click the microphone button below to unmute and start speaking</li>
+              <li>Your microphone starts muted by default - click to enable it</li>
               <li>Share this room link with others to invite them</li>
               <li>Click &quot;Leave&quot; when you&apos;re done with the call</li>
-              <li>All participants will hear each other in real-time</li>
+              <li>All participants can hear each other in real-time</li>
             </ul>
           </div>
         </section>
@@ -261,6 +275,86 @@ export default function VoiceRoom({
         </div>
       </LiveKitRoom>
     </main>
+  );
+}
+
+// Participants Display Component
+function ParticipantsDisplay() {
+  const participants = useParticipants();
+  const audioTracks = useTracks([Track.Source.Microphone]);
+  
+  return (
+    <section className="max-w-2xl mx-auto px-4">
+      <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-6 space-y-4 text-slate-900">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold">Participants ({participants.length})</h2>
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span>Live</span>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {participants.map((participant) => {
+            const isSpeaking = audioTracks.some(
+              track => track.participant.identity === participant.identity && 
+              track.publication.isMuted === false
+            );
+            const isMuted = !audioTracks.some(
+              track => track.participant.identity === participant.identity && 
+              track.publication.isMuted === false
+            );
+            
+            return (
+              <div 
+                key={participant.identity}
+                className={`rounded-lg border p-3 flex items-center gap-3 transition-all ${
+                  isSpeaking 
+                    ? 'border-green-500 bg-green-50/50' 
+                    : 'border-black/10 bg-white/50'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                  isSpeaking ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  {participant.name?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{participant.name || 'Guest'}</p>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    {isMuted ? (
+                      <>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                        </svg>
+                        <span>Muted</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <span className="text-green-600">Can talk</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {isSpeaking && (
+                  <div className="flex gap-0.5">
+                    <div className="w-1 h-4 bg-green-500 rounded-full animate-pulse"></div>
+                    <div className="w-1 h-6 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-1 h-5 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-slate-600 text-center pt-2">
+          💡 All participants have microphone access. Click the mic button in the control bar to unmute yourself.
+        </p>
+      </div>
+    </section>
   );
 }
 

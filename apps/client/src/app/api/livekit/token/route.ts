@@ -24,7 +24,9 @@ export async function GET(req: NextRequest) {
     room,
     roomJoin: true,
     canPublish: true,
+    canPublishData: true,
     canSubscribe: true,
+    canPublishSources: ['microphone', 'screen_share'],
   } as VideoGrant);
 
   return NextResponse.json(
