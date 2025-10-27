@@ -1,192 +1,340 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
 
 export default function LandingPage() {
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    setIsVisible(true)
-  }, [])
-
   return (
-    <main className="space-y-16 relative">
-      {/* Landing background: light cream with gold dot grid */}
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10"
-        style={{
-          backgroundColor: '#fff8dc',
-          backgroundImage: 'radial-gradient(rgba(201,162,39,0.6) 1px, transparent 1px)',
-          backgroundSize: '36px 36px',
-          backgroundPosition: '0 0',
-        }}
-      />
-      {/* Hero */}
-      <section className="text-center space-y-4 sm:space-y-6 text-slate-900 px-2">
-        <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 transition-all duration-1000 ease-out ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
-          <span className={`inline-block transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>Speak Naturally.</span>{' '}
-          <span className={`inline-block transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>Be Understood Instantly</span>{' '}
-          <span className={`inline-block transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>— with TRAVoices</span>
-        </h1>
-        <p className={`mx-auto max-w-3xl text-base sm:text-lg md:text-xl text-slate-700 px-2 transition-all duration-1000 delay-700 ease-out ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
-          An AI-powered real-time translation platform that lets people speak any language — and be heard in their own cloned voice.
-          Bridge conversations across cultures, languages, and accents — all in real time.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Link
-            href="/signup"
-            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold text-slate-900 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30 relative overflow-hidden bg-gradient-to-r from-yellow-400 to-amber-500 transition-all duration-1000 delay-900 ${
-              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
-            }`}
-            aria-label="Start talking"
-            style={{
-              backgroundSize: '200% 100%',
-              animation: isVisible ? 'balayageRTL 3s ease-in-out infinite' : 'none'
-            }}
-          >
-            <span className="relative z-10">Start Talking</span>
-          </Link>
-          <Link
-            href="/signup"
-            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold border border-white/20 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30 relative overflow-hidden transition-all duration-1000 delay-1000 ${
-              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
-            }`}
-            aria-label="Create an account"
-            style={{
-              background: 'linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.05) 100%)',
-              backgroundSize: '200% 100%',
-              animation: isVisible ? 'balayageLTR 3s ease-in-out infinite' : 'none'
-            }}
-          >
-            <span className="relative z-10">Create Account</span>
-          </Link>
-        </div>
-        <style jsx>{`
-          @keyframes balayageRTL {
-            0%, 100% {
-              background-position: 100% 50%;
-            }
-            50% {
-              background-position: 0% 50%;
-            }
-          }
-          @keyframes balayageLTR {
-            0%, 100% {
-              background-position: 0% 50%;
-            }
-            50% {
-              background-position: 100% 50%;
-            }
-          }
-        `}</style>
-      </section>
+    <main className="space-y-4">
+      {/* Hero Section */}
+      <section className="py-8 mt-4">
+        <div className="bg-black text-white px-6 py-12 rounded-2xl mx-1">
+          <div className="max-w-none mx-auto px-2">
+            <div className="grid lg:grid-cols-3 gap-8 items-center">
+            {/* Left Side - Value Proposition */}
+            <div className="lg:col-span-2 space-y-4">
+              <h1 className="text-3xl lg:text-5xl font-bold leading-tight">
+                Quality Products,<br />
+                Trusted Suppliers
+              </h1>
+              <p className="text-base lg:text-lg text-gray-300 max-w-lg">
+                Find everything you need for your business from verified global suppliers. 
+                Enjoy secure transactions and reliable delivery.
+              </p>
+              
+              {/* Search Bar */}
+              <div className="flex items-center bg-white rounded-lg p-1.5 max-w-lg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 ml-2">
+                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input 
+                  type="text" 
+                  placeholder="Search for any product or brand"
+                  className="flex-1 px-2 py-1.5 text-black placeholder-gray-500 outline-none text-sm"
+                />
+                <button className="bg-yellow-400 text-black p-1.5 rounded-md hover:bg-yellow-300 transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14m-7-7l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
 
-      {/* Who we are */}
-      <section className="grid md:grid-cols-3 gap-4 sm:gap-6 items-stretch">
-        <div className="md:col-span-2 rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6 space-y-3 sm:space-y-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Who We Are</h2>
-          <p className="text-sm sm:text-base text-slate-800">
-            We are <span className="font-semibold">Saudi Innovators</span> — 
-            Our mission is to make language barriers disappear — enabling anyone to speak naturally and be understood perfectly.
-          </p>
-          <p className="text-sm sm:text-base text-slate-700">
-            TRAVoices was born from the belief that true connection happens when technology feels invisible — when people can talk, understand, and collaborate effortlessly, no matter their language.
-          </p>
-        </div>
-        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-slate-900">Leadership</h3>
-          <p className="mt-2 text-sm sm:text-base text-slate-800">
-            <span className="font-semibold">نــاصـر آل خازم</span>, CEO
-          </p>
-          <p className="mt-1 text-xs sm:text-sm text-slate-700">
-            Founder and visionary leading the mission to create the world&apos;s most human-sounding AI translator.
-            Focused on real-time communication, speech synthesis, and contextual understanding that feels truly natural.
-          </p>
+            {/* Right Side - Product Grid */}
+            <div className="lg:col-span-1 grid grid-cols-3 gap-4 relative overflow-hidden">
+              {/* Left column cards - Rising animation */}
+              <div className="space-y-4">
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through">
+                  <div className="w-full h-full bg-black rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through-delay-1">
+                  <div className="w-full h-full bg-orange-200 rounded-lg"></div>
+                </div>
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through-delay-2">
+                  <div className="w-full h-full bg-pink-200 rounded-lg flex items-center justify-center">
+                    <div className="w-6 h-6 bg-pink-400 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Middle column cards - Rising animation */}
+              <div className="space-y-4">
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through">
+                  <div className="w-full h-full bg-yellow-400 rounded-lg"></div>
+                </div>
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through-delay-1">
+                  <div className="w-full h-full bg-gray-800 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-12 bg-gray-600 rounded"></div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through-delay-2">
+                  <div className="w-full h-full bg-yellow-600 rounded-lg"></div>
+                </div>
+              </div>
+              
+              {/* Right column cards - Rising animation */}
+              <div className="space-y-4">
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through">
+                  <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-8 bg-gray-400 rounded"></div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through-delay-1">
+                  <div className="w-full h-full bg-teal-600 rounded-lg"></div>
+                </div>
+                <div className="bg-white rounded-lg flex items-center justify-center p-2 h-32 animate-rise-through-delay-2">
+                  <div className="w-full h-full bg-gray-400 rounded-lg"></div>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* What is the SaaS */}
-      <section className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6 space-y-3 sm:space-y-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">What is TRAVoices?</h2>
-        <p className="text-sm sm:text-base text-slate-800">
-          TRAVoices is a Software-as-a-Service platform that performs live multilingual voice translation with near-perfect context understanding and voice cloning.
-          Speak once — and be heard in another language, with your own voice.
-        </p>
-        <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs sm:text-sm text-slate-800">
-          <li className="rounded-lg border border-black/10 bg-white/70 p-3 sm:p-4">
-            <span className="block font-semibold text-sm sm:text-base mb-1">🎙 AI Voice Translation</span>
-            Translate speech live between any two languages with context-aware accuracy.
-          </li>
-          <li className="rounded-lg border border-black/10 bg-white/70 p-3 sm:p-4">
-            <span className="block font-semibold text-sm sm:text-base mb-1">🧠 Voice Cloning</span>
-            Preserve tone, rhythm, and emotional nuance of the original speaker.
-          </li>
-          <li className="rounded-lg border border-black/10 bg-white/70 p-3 sm:p-4">
-            <span className="block font-semibold text-sm sm:text-base mb-1">🌐 Multi-Language Support</span>
-            From English and Arabic to Mandarin, French, and beyond — TRAVoices adapts to every accent and dialect.
-          </li>
-          <li className="rounded-lg border border-black/10 bg-white/70 p-3 sm:p-4">
-            <span className="block font-semibold text-sm sm:text-base mb-1">🔊 Real-Time Calls</span>
-            Integrate into apps, video calls, or telephony systems for instant, two-way translation.
-          </li>
-          <li className="rounded-lg border border-black/10 bg-white/70 p-3 sm:p-4">
-            <span className="block font-semibold text-sm sm:text-base mb-1">💬 Cultural Context Engine</span>
-            Understand idioms and meaning, not just words.
-          </li>
-        </ul>
-      </section>
-
-      {/* What we do and aim */}
-      <section className="grid md:grid-cols-2 gap-4 sm:gap-6">
-        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6 space-y-2 sm:space-y-3">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">What We Do</h2>
-          <p className="text-sm sm:text-base text-slate-800">
-            We help individuals, businesses, and governments communicate across borders as if they spoke the same language.
-            From international meetings to customer service and education — TRAVoices makes global communication natural and human.
-          </p>
-        </div>
-        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6 space-y-2 sm:space-y-3">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Our Vision</h2>
-          <p className="text-sm sm:text-base text-slate-800">
-            To become the first universal voice translation layer for the world —
-            one that enables every person to speak in their voice, in any language, with clarity and emotion intact.
-          </p>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="text-center space-y-3 sm:space-y-4 text-slate-900 px-2">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">Ready to Speak Without Limits?</h2>
-        <p className="text-sm sm:text-base text-slate-700">Experience a new era of voice communication. Start your first live translation in seconds.</p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            href="/signup"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30"
-            aria-label="Try TRAVoices Now"
-          >
-            Try TRAVoices Now
-          </Link>
-          <Link
-            href="/login"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 font-semibold border border-white/20 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30"
-            aria-label="Login"
-          >
-            Login
-          </Link>
+      {/* Category Navigation */}
+      <section className="py-4 bg-white">
+        <div className="px-4">
+          <div className="flex items-center justify-center gap-6 overflow-x-auto">
+            {/* Category items */}
+            {[
+              { 
+                name: "Gaming", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 11h4M8 9v4M18 9h-2M18 13h-2M14 9h-2M14 13h-2"/><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/></svg>
+              },
+              { 
+                name: "Mobility", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16.1 10 13 10s-5.7.6-6.5 1.1C5.7 11.3 5 12.1 5 13v3c0 .6.4 1 1 1h2m-3 0v3c0 .6.4 1 1 1h1c.6 0 1-.4 1-1v-3m-3 0h3m0 0h3m-3 0v3c0 .6.4 1 1 1h1c.6 0 1-.4 1-1v-3m0 0h3"/></svg>
+              },
+              { 
+                name: "Monitor", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              },
+              { 
+                name: "Phone", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              },
+              { 
+                name: "Clothing", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+              },
+              { 
+                name: "Home", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+              },
+              { 
+                name: "Kids", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3c0 .74.29 1.41.76 1.91L12 8l2.24-1.09A3 3 0 0 0 12 2z"/><path d="M8 12a4 4 0 0 0-4 4v6h8v-6a4 4 0 0 0-4-4z"/><path d="M16 12a4 4 0 0 0-4 4v6h8v-6a4 4 0 0 0-4-4z"/></svg>
+              },
+              { 
+                name: "DIY", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              },
+              { 
+                name: "PC", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              },
+              { 
+                name: "Sport", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6.5 6.5h11v11h-11z"/><path d="M6.5 6.5L12 12l5.5-5.5"/><path d="M12 12l5.5 5.5"/><path d="M12 12L6.5 17.5"/></svg>
+              },
+              { 
+                name: "Camera", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              },
+              { 
+                name: "Garden", 
+                icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              }
+            ].map((category, index) => (
+              <Link 
+                key={index} 
+                href="#" 
+                className="flex flex-col items-center gap-1 p-3 hover:bg-gray-50 rounded-lg transition-colors min-w-[70px]"
+              >
+                <div className="text-black">{category.icon}</div>
+                <span className="text-sm font-medium text-black">{category.name}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="text-center space-y-2 text-slate-700 pb-6 sm:pb-8">
-        <p className="text-xs sm:text-sm">© 2025 TRAVoices — Built with passion</p>
-        <p className="text-xs sm:text-sm italic">Connecting voices. Uniting worlds.</p>
-      </footer>
+      {/* Product Discovery Sections */}
+      {/* Trending Products */}
+      <section className="py-6 bg-white">
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-black">Trending products</h2>
+            <Link href="#" className="flex items-center gap-2 text-black hover:text-gray-600 font-medium">
+              View all
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14m-7-7l7 7-7 7"/>
+              </svg>
+            </Link>
+          </div>
+
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow">
+                <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded"></div>
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-medium text-black">Popular</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Clothes */}
+      <section className="py-6 bg-white">
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-black">Clothes</h2>
+            <Link href="#" className="flex items-center gap-2 text-black hover:text-gray-600 font-medium">
+              View all
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14m-7-7l7 7-7 7"/>
+              </svg>
+            </Link>
+          </div>
+
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow">
+                <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded"></div>
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-medium text-black">Popular</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Phones */}
+      <section className="py-6 bg-white">
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-black">Phones</h2>
+            <Link href="#" className="flex items-center gap-2 text-black hover:text-gray-600 font-medium">
+              View all
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14m-7-7l7 7-7 7"/>
+              </svg>
+            </Link>
+          </div>
+
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow">
+                <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded"></div>
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-medium text-black">Popular</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Games */}
+      <section className="py-6 bg-white">
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-black">Games</h2>
+            <Link href="#" className="flex items-center gap-2 text-black hover:text-gray-600 font-medium">
+              View all
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14m-7-7l7 7-7 7"/>
+              </svg>
+            </Link>
+          </div>
+
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow">
+                <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded"></div>
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-medium text-black">Popular</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Home Equipment */}
+      <section className="py-6 bg-white">
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-black">Home Equipment</h2>
+            <Link href="#" className="flex items-center gap-2 text-black hover:text-gray-600 font-medium">
+              View all
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14m-7-7l7 7-7 7"/>
+              </svg>
+            </Link>
+          </div>
+
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow">
+                <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded"></div>
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-medium text-black">Popular</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tools */}
+      <section className="py-6 bg-white">
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-black">Tools</h2>
+            <Link href="#" className="flex items-center gap-2 text-black hover:text-gray-600 font-medium">
+              View all
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14m-7-7l7 7-7 7"/>
+              </svg>
+            </Link>
+          </div>
+
+          {/* Product Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow">
+                <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded"></div>
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-medium text-black">Popular</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   )
 }

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TRAVoices",
-  description: "AI-powered real-time voice translation",
+  title: "ZST ecom",
+  description: "Quality Products, Trusted Suppliers - Find everything you need for your business from verified global suppliers",
 };
 
 export default function RootLayout({
@@ -26,11 +26,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-slate-900 via-yellow-600 to-slate-900 text-white min-h-screen`}> 
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-black min-h-screen`}> 
         <div className="sticky top-0 z-50">
           <Header />
         </div>
-        <div className="mx-auto max-w-5xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        <div className="px-4 sm:px-6 lg:px-8">
           {children}
           <Footer />
         </div>

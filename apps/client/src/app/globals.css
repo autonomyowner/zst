@@ -1,123 +1,132 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0b0f1a;
-  --foreground: #e6e8ee;
-  --nc-accent-1: #8b5cf6; /* purple */
-  --nc-accent-2: #22d3ee; /* cyan */
-  --nc-surface: rgba(255, 255, 255, 0.06);
-  --nc-border: rgba(255, 255, 255, 0.12);
+  --background: #ffffff;
+  --foreground: #000000;
+  --accent: #ffff00;
+  --surface: #f8f9fa;
+  --border: #e5e7eb;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), var(--font-tajawal);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #070b16;
-    --foreground: #e6e8ee;
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* E-commerce specific utility classes */
+.product-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.search-input {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(255, 255, 0, 0.2);
+}
+
+.category-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--foreground);
+  transition: color 0.2s ease;
+}
+
+.category-icon:hover {
+  color: var(--accent);
+}
+
+/* Button styles */
+.btn-primary {
+  background: var(--foreground);
+  color: var(--background);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #333333;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--foreground);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--surface);
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--foreground);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn-accent:hover {
+  background: #e6e600;
+}
+
+/* Product card animations */
+@keyframes rise-through {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
   }
 }
 
-body {
-  /* Allow Tailwind gradient classes on <body> to control the site background */
-  background: transparent;
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-rise-through {
+  animation: rise-through 4s linear infinite;
 }
 
-/* React Flow base overrides for dark mode borders */
-.react-flow__node-default {
-  color: inherit;
+.animate-rise-through-delay-1 {
+  animation: rise-through 4s linear infinite;
+  animation-delay: 1.3s;
 }
 
-/* Subtle glass card surfaces */
-.nc-surface {
-  background: var(--nc-surface);
-  border: 1px solid var(--nc-border);
-  backdrop-filter: saturate(140%) blur(8px);
-}
-
-/* LiveKit Control Bar Styling - High Specificity */
-.lk-control-bar,
-.lk-control-bar * {
-  background: transparent !important;
-}
-
-.lk-control-bar .lk-button,
-.lk-control-bar button.lk-button {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  color: #1e293b !important;
-  border-radius: 8px !important;
-  font-weight: 500 !important;
-  padding: 8px 12px !important;
-  margin: 0 4px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-}
-
-.lk-control-bar .lk-button:hover,
-.lk-control-bar button.lk-button:hover {
-  background: rgba(255, 255, 255, 1) !important;
-  border-color: rgba(0, 0, 0, 0.2) !important;
-  transform: translateY(-1px) !important;
-}
-
-.lk-control-bar .lk-button[aria-pressed="true"],
-.lk-control-bar button.lk-button[aria-pressed="true"] {
-  background: #f59e0b !important;
-  color: white !important;
-  border-color: #d97706 !important;
-}
-
-.lk-control-bar .lk-button svg,
-.lk-control-bar button.lk-button svg {
-  color: inherit !important;
-  fill: currentColor !important;
-}
-
-.lk-disconnect-button,
-button.lk-disconnect-button {
-  background: #ef4444 !important;
-  color: white !important;
-  border: 1px solid #dc2626 !important;
-}
-
-.lk-disconnect-button:hover,
-button.lk-disconnect-button:hover {
-  background: #dc2626 !important;
-  transform: translateY(-1px) !important;
-}
-
-.lk-device-menu,
-div.lk-device-menu {
-  background: white !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
-  padding: 8px !important;
-}
-
-.lk-device-menu .lk-button,
-.lk-device-menu button.lk-button {
-  color: #1e293b !important;
-  background: transparent !important;
-  border: none !important;
-  padding: 8px 12px !important;
-  border-radius: 6px !important;
-  width: 100% !important;
-  text-align: left !important;
-}
-
-.lk-device-menu .lk-button:hover,
-.lk-device-menu button.lk-button:hover {
-  background: #f8fafc !important;
+.animate-rise-through-delay-2 {
+  animation: rise-through 4s linear infinite;
+  animation-delay: 2.6s;
 }
