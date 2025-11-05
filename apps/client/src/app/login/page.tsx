@@ -3,43 +3,49 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase, supabaseConfigured } from "../../lib/supabase"
+import { useAuth } from "@/contexts/AuthContext"
+import AuthLoadingSpinner from "@/components/AuthLoadingSpinner"
 
 function LoginBody() {
   const router = useRouter()
   const params = useSearchParams()
+  const { user, loading: authLoading } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [status, setStatus] = useState<string>("")
-  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [showResendOption, setShowResendOption] = useState(false)
 
+  // Redirect if already logged in
   useEffect(() => {
-    let mounted = true
-    const init = async () => {
-      const res = await supabase?.auth.getSession()
-      const data = res?.data
-      if (!mounted) return
-      if (data?.session) {
-        // User is already logged in, redirect them
-        setStatus("You're already logged in! Redirecting...")
-        const redirect = params.get("redirect") || "/rooms"
-        setTimeout(() => router.replace(redirect), 1000)
-        return
-      }
-      setLoading(false)
+    if (!authLoading && user) {
+      const redirect = params.get("redirect") || "/rooms"
+      router.replace(redirect)
     }
-    init()
-    return () => { mounted = false }
-  }, [params, router])
+  }, [user, authLoading, router, params])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Prevent submission if already logged in
+    if (user) {
+      setStatus("You're already logged in! Redirecting...")
+      const redirect = params.get("redirect") || "/rooms"
+      router.replace(redirect)
+      return
+    }
+
     if (!supabase) return
+    setSubmitting(true)
     setStatus("Logging in…")
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
+    
+    setSubmitting(false)
+    
     if (error) {
       // Provide more helpful error messages
       if (error.message.includes("Invalid login credentials") || error.message.includes("Invalid")) {
@@ -54,15 +60,29 @@ function LoginBody() {
     } else if (data.session) {
       setStatus("✅ Success! Redirecting...")
       const redirect = params.get("redirect") || "/rooms"
-      setTimeout(() => router.replace(redirect), 500)
+      // Force a hard navigation to clear cache and ensure fresh state
+      setTimeout(() => {
+        window.location.href = redirect
+      }, 500)
     }
   }
 
   const handleOAuth = async (provider: "google" | "github") => {
+    // Prevent OAuth if already logged in
+    if (user) {
+      const redirect = params.get("redirect") || "/rooms"
+      router.replace(redirect)
+      return
+    }
+    
     if (!supabase) return
+    setSubmitting(true)
     setStatus(`Redirecting to ${provider}…`)
     const { error } = await supabase.auth.signInWithOAuth({ provider })
-    if (error) setStatus(`Error: ${error.message}`)
+    if (error) {
+      setStatus(`Error: ${error.message}`)
+      setSubmitting(false)
+    }
   }
 
   const handleResendVerification = async () => {
@@ -89,24 +109,14 @@ function LoginBody() {
     )
   }
 
-  if (loading) {
-    return (
-      <main className="relative min-h-screen flex items-center justify-center">
-        <div
-          aria-hidden
-          className="fixed inset-0 -z-10"
-          style={{
-            backgroundColor: '#fff8dc',
-            backgroundImage: 'radial-gradient(rgba(201,162,39,0.6) 1px, transparent 1px)',
-            backgroundSize: '36px 36px',
-            backgroundPosition: '0 0',
-          }}
-        />
-        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-6 text-slate-900">
-          <p className="text-sm opacity-70">{status || "Checking session…"}</p>
-        </div>
-      </main>
-    )
+  // Show loading while checking auth state
+  if (authLoading) {
+    return <AuthLoadingSpinner message="Checking session…" />
+  }
+
+  // Don't show form if already logged in (will redirect)
+  if (user) {
+    return <AuthLoadingSpinner message="You're already logged in! Redirecting..." />
   }
 
   return (
@@ -155,10 +165,11 @@ function LoginBody() {
             </div>
             <button
               type="submit"
+              disabled={submitting || authLoading}
               aria-label="Log in with email and password"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Log in
+              {submitting ? "Logging in…" : "Log in"}
             </button>
           </form>
 
@@ -171,15 +182,17 @@ function LoginBody() {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleOAuth("google")}
+              disabled={submitting || authLoading || !!user}
               aria-label="Continue with Google"
-              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-sm hover:bg-white/80"
+              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-sm hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Google
             </button>
             <button
               onClick={() => handleOAuth("github")}
+              disabled={submitting || authLoading || !!user}
               aria-label="Continue with GitHub"
-              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-sm hover:bg-white/80"
+              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-sm hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               GitHub
             </button>
