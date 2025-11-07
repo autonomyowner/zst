@@ -60,10 +60,10 @@ function LoginBody() {
     } else if (data.session) {
       setStatus("✅ Success! Redirecting...")
       const redirect = params.get("redirect") || "/rooms"
-      // Force a hard navigation to clear cache and ensure fresh state
-      setTimeout(() => {
-        window.location.href = redirect
-      }, 500)
+      // Wait a moment for auth context to update, then navigate
+      await new Promise(resolve => setTimeout(resolve, 300))
+      router.push(redirect)
+      router.refresh() // Refresh to update auth context and clear cache
     }
   }
 
@@ -131,13 +131,13 @@ function LoginBody() {
           backgroundPosition: '0 0',
         }}
       />
-      <section className="max-w-md mx-auto space-y-6">
+      <section className="max-w-md mx-auto space-y-4 sm:space-y-6 px-4">
         <div className="text-center space-y-2 text-slate-900">
-          <h1 className="text-3xl font-extrabold tracking-tight">Welcome back</h1>
-          <p className="text-slate-700 text-sm">Log in with your email and password or continue with your favorite provider.</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Welcome back</h1>
+          <p className="text-slate-700 text-xs sm:text-sm">Log in with your email and password or continue with your favorite provider.</p>
         </div>
 
-        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-6 text-slate-900">
+        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6 text-slate-900">
           <form onSubmit={handleEmailLogin} className="space-y-3">
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
@@ -147,7 +147,7 @@ function LoginBody() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50"
+                className="w-full rounded-md border border-black/20 bg-white/70 p-2 sm:p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
                 required
               />
             </div>
@@ -159,7 +159,7 @@ function LoginBody() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50"
+                className="w-full rounded-md border border-black/20 bg-white/70 p-2 sm:p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
                 required
               />
             </div>
@@ -167,7 +167,7 @@ function LoginBody() {
               type="submit"
               disabled={submitting || authLoading}
               aria-label="Log in with email and password"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm sm:text-base"
             >
               {submitting ? "Logging in…" : "Log in"}
             </button>
@@ -184,7 +184,7 @@ function LoginBody() {
               onClick={() => handleOAuth("google")}
               disabled={submitting || authLoading || !!user}
               aria-label="Continue with Google"
-              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-sm hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-xs sm:text-sm hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               Google
             </button>
@@ -192,7 +192,7 @@ function LoginBody() {
               onClick={() => handleOAuth("github")}
               disabled={submitting || authLoading || !!user}
               aria-label="Continue with GitHub"
-              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-sm hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-xs sm:text-sm hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               GitHub
             </button>
@@ -232,8 +232,8 @@ function LoginBody() {
           )}
         </div>
 
-        <p className="text-center text-sm text-slate-800">
-          New here? <a href="/signup" className="underline underline-offset-4">Create an account</a>
+        <p className="text-center text-xs sm:text-sm text-slate-800">
+          New here? <a href="/signup" className="underline underline-offset-4 min-h-[44px] inline-flex items-center">Create an account</a>
         </p>
       </section>
     </main>

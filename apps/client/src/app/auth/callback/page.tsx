@@ -25,15 +25,15 @@ export default function AuthCallbackPage() {
           return
         }
         // Force a session refresh to ensure state is updated
-        await supabase.auth.getSession()
+        await supabase.auth.getUser() // Use getUser() for more reliable state check
         // Optional: support redirect query param
         const url = new URL(window.location.href)
         const redirect = url.searchParams.get("redirect") || "/rooms"
         setStatus("Successfully authenticated! Redirecting...")
-        // Use window.location for hard navigation to clear cache
-        setTimeout(() => {
-          window.location.href = redirect
-        }, 500)
+        // Wait a moment for auth context to update, then navigate
+        await new Promise(resolve => setTimeout(resolve, 300))
+        router.push(redirect)
+        router.refresh() // Refresh to update auth context and clear cache
       } catch (err) {
         setStatus("Unexpected error during auth callback.")
       }

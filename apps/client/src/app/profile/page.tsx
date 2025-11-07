@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
+
 interface UserProfile {
   id: string;
   email: string | null;
@@ -23,53 +26,90 @@ export default function ProfilePage() {
   const [status, setStatus] = useState<string>("");
 
   useEffect(() => {
-    const loadProfile = async () => {
+    const loadProfile = async (retries = 3) => {
       if (!supabaseConfigured || !supabase) {
         setStatus("Authentication not configured");
         setLoading(false);
         return;
       }
 
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session) {
-        router.replace("/login?redirect=/profile");
-        return;
-      }
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          // Force fresh session check with cache-busting
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          
+          if (sessionError) {
+            if (attempt < retries) {
+              console.warn(`Session fetch attempt ${attempt} failed, retrying...`, sessionError);
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+              continue;
+            }
+          }
+          
+          if (sessionError || !session) {
+            router.replace("/login?redirect=/profile");
+            return;
+          }
 
-      // Fetch user profile
-      const { data: profileData, error: profileError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-
-      if (profileError) {
-        console.error("Profile fetch error:", profileError);
-        // Create profile if it doesn't exist
-        const { error: insertError } = await supabase
-          .from("users")
-          .insert({
-            id: session.user.id,
-            email: session.user.email,
-            full_name: session.user.email?.split('@')[0] || 'User',
-          });
-        
-        if (!insertError) {
-          // Refetch after creation
-          const { data: newProfile } = await supabase
+          // Fetch user profile with cache-busting
+          const { data: profileData, error: profileError } = await supabase
             .from("users")
             .select("*")
             .eq("id", session.user.id)
             .single();
-          
-          setProfile(newProfile);
-        }
-      } else {
-        setProfile(profileData);
-      }
 
-      setLoading(false);
+          if (profileError) {
+            // Check if it's a "not found" error (PGRST116) - profile doesn't exist
+            if (profileError.code === 'PGRST116' || profileError.message.includes('No rows')) {
+              // Create profile if it doesn't exist
+              const { error: insertError } = await supabase
+                .from("users")
+                .insert({
+                  id: session.user.id,
+                  email: session.user.email,
+                  full_name: session.user.email?.split('@')[0] || 'User',
+                });
+              
+              if (!insertError) {
+                // Refetch after creation with fresh query
+                const { data: newProfile } = await supabase
+                  .from("users")
+                  .select("*")
+                  .eq("id", session.user.id)
+                  .single();
+                
+                setProfile(newProfile);
+              } else {
+                console.error("Error creating profile:", insertError);
+                setStatus("Failed to create profile");
+              }
+            } else {
+              // Other errors - retry if not last attempt
+              if (attempt < retries) {
+                console.warn(`Profile fetch attempt ${attempt} failed, retrying...`, profileError);
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                continue;
+              }
+              console.error("Profile fetch error:", profileError);
+              setStatus("Failed to load profile");
+            }
+          } else {
+            setProfile(profileData);
+          }
+
+          setLoading(false);
+          return; // Success, exit retry loop
+        } catch (err: any) {
+          if (attempt < retries) {
+            console.warn(`Profile load attempt ${attempt} failed, retrying...`, err);
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            continue;
+          }
+          console.error("Error loading profile:", err);
+          setStatus("Failed to load profile");
+          setLoading(false);
+        }
+      }
     };
 
     loadProfile();
@@ -170,44 +210,45 @@ export default function ProfilePage() {
         }}
       />
 
-      <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
-        <div className="flex items-center justify-between mb-8">
+      <div className="max-w-3xl mx-auto px-2 sm:px-4 py-4 sm:py-6 md:py-8 sm:py-12">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 md:mb-8 gap-3">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
               Your Profile
             </h1>
-            <p className="text-slate-700 mt-2">
+            <p className="text-sm sm:text-base text-slate-700 mt-2">
               Manage your account information
             </p>
           </div>
           <button
             onClick={() => router.push("/rooms")}
-            className="inline-flex items-center gap-2 rounded-md px-3 sm:px-4 py-2 text-sm font-medium border border-black/15 bg-white/60 hover:bg-white/80"
+            className="inline-flex items-center gap-2 rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border border-black/15 bg-white/60 hover:bg-white/80 min-h-[44px] self-start sm:self-auto"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             <span className="hidden sm:inline">Back to Rooms</span>
+            <span className="sm:hidden">Back</span>
           </button>
         </div>
 
-        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-6 sm:p-8 text-slate-900">
-          <form onSubmit={handleSave} className="space-y-6">
+        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6 md:p-8 text-slate-900">
+          <form onSubmit={handleSave} className="space-y-4 sm:space-y-6">
             {/* Profile Avatar */}
             <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg">
                 {profile.full_name?.charAt(0).toUpperCase() || profile.email?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div className="text-center sm:text-left">
-                <h3 className="text-xl font-bold">{profile.full_name || 'Your Name'}</h3>
-                <p className="text-sm text-slate-600">{profile.email}</p>
+                <h3 className="text-lg sm:text-xl font-bold">{profile.full_name || 'Your Name'}</h3>
+                <p className="text-xs sm:text-sm text-slate-600">{profile.email}</p>
               </div>
             </div>
 
             <div className="h-px bg-black/10" />
 
             {/* Profile Form */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="sm:col-span-2">
                 <label htmlFor="full_name" className="block text-sm font-medium mb-1">
                   Full Name
@@ -218,7 +259,7 @@ export default function ProfilePage() {
                   value={profile.full_name || ''}
                   onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
                   placeholder="Your full name"
-                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50"
+                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
                 />
               </div>
 
@@ -232,7 +273,7 @@ export default function ProfilePage() {
                   value={profile.phone || ''}
                   onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                   placeholder="+1 (555) 000-0000"
-                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50"
+                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
                 />
               </div>
 
@@ -246,7 +287,7 @@ export default function ProfilePage() {
                   value={profile.company || ''}
                   onChange={(e) => setProfile({ ...profile, company: e.target.value })}
                   placeholder="Your company"
-                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50"
+                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
                 />
               </div>
 
@@ -260,7 +301,7 @@ export default function ProfilePage() {
                   value={profile.website || ''}
                   onChange={(e) => setProfile({ ...profile, website: e.target.value })}
                   placeholder="https://example.com"
-                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50"
+                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
                 />
               </div>
 
@@ -274,7 +315,7 @@ export default function ProfilePage() {
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                   placeholder="Tell us about yourself..."
                   rows={4}
-                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50 resize-none"
+                  className="w-full rounded-md border border-black/20 bg-white/70 p-2 outline-none focus:ring-2 focus:ring-amber-400/50 resize-none text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -283,7 +324,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 min-h-[44px] text-sm sm:text-base"
               >
                 {saving ? (
                   <>
@@ -302,7 +343,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => router.push("/rooms")}
-                className="sm:flex-none inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold border border-black/15 bg-white/60 hover:bg-white/80"
+                className="sm:flex-none inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold border border-black/15 bg-white/60 hover:bg-white/80 min-h-[44px] text-sm sm:text-base"
               >
                 Cancel
               </button>
