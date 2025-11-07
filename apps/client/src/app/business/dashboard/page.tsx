@@ -43,26 +43,6 @@ export default function BusinessDashboardPage() {
   const [balance, setBalance] = useState<number>(0)
   const [dueAmount, setDueAmount] = useState<number>(0)
 
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user || !profile) {
-        router.push('/business/login')
-        return
-      }
-      if (profile.role !== 'retailer' && profile.role !== 'wholesaler' && profile.role !== 'importer') {
-        return
-      }
-      // Initialize balance and due amount from profile
-      if (profile.balance !== undefined) {
-        setBalance(profile.balance)
-      }
-      if (profile.due_amount !== undefined) {
-        setDueAmount(profile.due_amount)
-      }
-      fetchDashboardData()
-    }
-  }, [user, profile, authLoading, router, fetchDashboardData])
-
   const fetchDashboardData = useCallback(async () => {
     if (!supabase || !profile) return
 
@@ -158,6 +138,26 @@ export default function BusinessDashboardPage() {
       setLoading(false)
     }
   }, [profile])
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user || !profile) {
+        router.push('/business/login')
+        return
+      }
+      if (profile.role !== 'retailer' && profile.role !== 'wholesaler' && profile.role !== 'importer') {
+        return
+      }
+      // Initialize balance and due amount from profile
+      if (profile.balance !== undefined) {
+        setBalance(profile.balance)
+      }
+      if (profile.due_amount !== undefined) {
+        setDueAmount(profile.due_amount)
+      }
+      fetchDashboardData()
+    }
+  }, [user, profile, authLoading, router, fetchDashboardData])
 
   const calculateStatistics = (
     listings: ListingWithProduct[],
