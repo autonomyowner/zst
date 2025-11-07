@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
@@ -35,9 +35,9 @@ export default function CheckoutPage() {
     } else {
       router.push('/')
     }
-  }, [listingId])
+  }, [listingId, fetchListing, router])
 
-  const fetchListing = async () => {
+  const fetchListing = useCallback(async () => {
     if (!supabase || !listingId) return
 
     try {
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [listingId, router])
 
   const getErrorMessage = (error: unknown): string => {
     if (!error) return 'Unknown error occurred'

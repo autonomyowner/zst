@@ -237,7 +237,7 @@ export default function BusinessSignupPage() {
 
       // Redirect to dashboard
       router.push('/business/dashboard')
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.')
       setSubmitting(false)
     }

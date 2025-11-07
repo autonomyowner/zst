@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/contexts/AuthContext"
 import { uploadProductImage } from "@/lib/storage"
-import type { ListingWithProduct, Product, Category, TargetRole } from "@/types/database"
+import type { ListingWithProduct, Category, TargetRole } from "@/types/database"
 
 // Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic'
@@ -47,9 +47,9 @@ export default function MyListingsPage() {
         fetchCategories(),
       ])
     }
-  }, [user, profile, authLoading, router])
+  }, [user, profile, authLoading, router, fetchListings])
 
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     if (!supabase || !profile) return
 
     try {
@@ -73,7 +73,7 @@ export default function MyListingsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [profile])
 
   const fetchCategories = async () => {
     if (!supabase) return

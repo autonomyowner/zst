@@ -1,12 +1,12 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/contexts/AuthContext"
-import type { ListingWithProduct, OrderB2C, OrderB2B, OrderB2CWithItems, OrderB2BWithItems } from "@/types/database"
+import type { ListingWithProduct, OrderB2CWithItems, OrderB2BWithItems } from "@/types/database"
 import Sidebar from "@/components/business/Sidebar"
 import TopHeader from "@/components/business/TopHeader"
 import GetStarted from "@/components/business/GetStarted"
@@ -61,9 +61,9 @@ export default function BusinessDashboardPage() {
       }
       fetchDashboardData()
     }
-  }, [user, profile, authLoading, router])
+  }, [user, profile, authLoading, router, fetchDashboardData])
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     if (!supabase || !profile) return
 
     try {
@@ -157,7 +157,7 @@ export default function BusinessDashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [profile])
 
   const calculateStatistics = (
     listings: ListingWithProduct[],

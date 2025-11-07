@@ -34,7 +34,7 @@ export default function AuthCallbackPage() {
         await new Promise(resolve => setTimeout(resolve, 300))
         router.push(redirect)
         router.refresh() // Refresh to update auth context and clear cache
-      } catch (err) {
+      } catch {
         setStatus("Unexpected error during auth callback.")
       }
     }

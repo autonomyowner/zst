@@ -116,7 +116,7 @@ export default function BusinessLoginPage() {
         router.push('/business/dashboard')
         router.refresh() // Refresh to update auth context
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.')
       setSubmitting(false)
     }

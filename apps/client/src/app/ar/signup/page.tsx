@@ -3,13 +3,11 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase, supabaseConfigured } from "@/lib/supabase"
-import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
 import AuthLoadingSpinner from "@/components/AuthLoadingSpinner"
 
 function SignupPageInnerArabic() {
   const router = useRouter()
-  const params = useSearchParams()
   const { user, loading: authLoading } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
