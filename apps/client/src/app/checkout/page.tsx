@@ -239,7 +239,7 @@ export default function CheckoutPage() {
             Order ID: #{orderId}
           </p>
           <p className="text-sm sm:text-base text-gray-600 mb-6">
-            We've received your order and will process it shortly. You'll be contacted for delivery via Cash on Delivery.
+            We&apos;ve received your order and will process it shortly. You&apos;ll be contacted for delivery via Cash on Delivery.
           </p>
           <button
             onClick={() => router.push('/')}

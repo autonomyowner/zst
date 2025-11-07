@@ -50,7 +50,7 @@ export default function BusinessLoginPage() {
 
       if (data.user) {
         // Check if user has a profile
-        let { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', data.user.id)
@@ -188,7 +188,7 @@ export default function BusinessLoginPage() {
 
         <div className="mt-4 sm:mt-6 text-center">
           <p className="text-xs sm:text-sm text-gray-600">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/business/signup" className="text-black font-medium hover:underline min-h-[44px] inline-flex items-center">
               Sign up
             </Link>

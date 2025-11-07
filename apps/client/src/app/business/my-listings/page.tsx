@@ -563,7 +563,7 @@ export default function MyListingsPage() {
 
       {listings.length === 0 ? (
         <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-lg p-4 sm:p-6">
-          <p className="text-gray-500 text-base sm:text-lg mb-4">You don't have any listings yet.</p>
+          <p className="text-gray-500 text-base sm:text-lg mb-4">You don&apos;t have any listings yet.</p>
           <button
             onClick={() => setShowCreateForm(true)}
             className="px-4 sm:px-6 py-3 bg-yellow-400 text-black font-medium rounded-lg hover:bg-yellow-300 transition-colors text-sm sm:text-base min-h-[44px]"
