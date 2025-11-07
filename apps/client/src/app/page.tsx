@@ -33,7 +33,7 @@ export default function LandingPage() {
         // Non-authenticated users (customers) see only 'customer' listings
         // Authenticated business users should be redirected to business dashboard
         // But if they're on the main page, we'll still only show customer listings
-        let targetRole: 'customer' | 'retailer' | 'wholesaler' = 'customer'
+        const targetRole: 'customer' | 'retailer' | 'wholesaler' = 'customer'
         
         // Force fresh query with cache-busting
         const { data, error: supabaseError } = await supabase
