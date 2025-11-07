@@ -8,3 +8,4 @@ export function formatDZD(amount: number): string {
   return `${formatted} DZD`
 }
 
+

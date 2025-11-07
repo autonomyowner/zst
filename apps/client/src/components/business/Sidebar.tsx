@@ -147,3 +147,4 @@ export default function Sidebar({ balance = 0, dueAmount = 0 }: SidebarProps) {
   )
 }
 
+

@@ -187,3 +187,4 @@ export default function GetStarted({ balance = 0, hasProducts = false, onActivat
   )
 }
 
+
