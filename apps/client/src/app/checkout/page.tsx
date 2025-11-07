@@ -29,14 +29,6 @@ export default function CheckoutPage() {
 
   const quantity = quantityParam ? parseInt(quantityParam) : 1
 
-  useEffect(() => {
-    if (listingId) {
-      fetchListing()
-    } else {
-      router.push('/')
-    }
-  }, [listingId, fetchListing, router])
-
   const fetchListing = useCallback(async () => {
     if (!supabase || !listingId) return
 
@@ -66,6 +58,14 @@ export default function CheckoutPage() {
       setLoading(false)
     }
   }, [listingId, router])
+
+  useEffect(() => {
+    if (listingId) {
+      fetchListing()
+    } else {
+      router.push('/')
+    }
+  }, [listingId, fetchListing, router])
 
   const getErrorMessage = (error: unknown): string => {
     if (!error) return 'Unknown error occurred'

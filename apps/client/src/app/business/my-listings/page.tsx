@@ -36,19 +36,6 @@ export default function MyListingsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user || !profile) {
-        router.push('/business/login')
-        return
-      }
-      Promise.all([
-        fetchListings(),
-        fetchCategories(),
-      ])
-    }
-  }, [user, profile, authLoading, router, fetchListings])
-
   const fetchListings = useCallback(async () => {
     if (!supabase || !profile) return
 
@@ -74,6 +61,19 @@ export default function MyListingsPage() {
       setLoading(false)
     }
   }, [profile])
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user || !profile) {
+        router.push('/business/login')
+        return
+      }
+      Promise.all([
+        fetchListings(),
+        fetchCategories(),
+      ])
+    }
+  }, [user, profile, authLoading, router, fetchListings])
 
   const fetchCategories = async () => {
     if (!supabase) return
