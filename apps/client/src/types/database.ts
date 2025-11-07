@@ -32,6 +32,7 @@ export interface Product {
   category_id: number | null;
   created_at: string;
   updated_at: string;
+  category?: Category;
 }
 
 export interface Listing {
@@ -47,7 +48,6 @@ export interface Listing {
 
 export interface ListingWithProduct extends Listing {
   product: Product;
-  category?: Category;
 }
 
 export interface OrderB2C {

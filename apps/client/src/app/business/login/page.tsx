@@ -50,7 +50,7 @@ export default function BusinessLoginPage() {
 
       if (data.user) {
         // Check if user has a profile
-        const { data: profile } = await supabase
+        let { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', data.user.id)

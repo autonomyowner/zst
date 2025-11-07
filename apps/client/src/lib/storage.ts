@@ -44,7 +44,7 @@ export async function uploadProductImage(
     console.error('Error uploading image:', error)
     
     // Provide helpful error message for missing bucket
-    if (error.message?.includes('Bucket not found') || error.message?.includes('bucket') || error.statusCode === 400) {
+    if (error.message?.includes('Bucket not found') || error.message?.includes('bucket')) {
       throw new Error(
         'Storage bucket not found. Please create the "product_images" bucket in Supabase Storage. ' +
         'See STORAGE_SETUP.md for instructions.'

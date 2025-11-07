@@ -206,9 +206,9 @@ export default function BusinessSignupPage() {
       if (!profileSuccess) {
         const errorDetails = lastError ? {
           message: lastError.message,
-          code: lastError.code,
-          details: lastError.details,
-          hint: lastError.hint,
+          code: 'code' in lastError ? (lastError as { code?: string }).code : undefined,
+          details: 'details' in lastError ? (lastError as { details?: string }).details : undefined,
+          hint: 'hint' in lastError ? (lastError as { hint?: string }).hint : undefined,
           toString: String(lastError),
         } : 'No error object returned'
         
