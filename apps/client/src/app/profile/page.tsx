@@ -51,11 +51,14 @@ export default function ProfilePage() {
             return;
           }
 
+          // session is guaranteed to be defined here after the check above
+          const userId = session.user.id;
+
           // Fetch user profile with cache-busting
           const { data: profileData, error: profileError } = await supabase
             .from("users")
             .select("*")
-            .eq("id", session.user.id)
+            .eq("id", userId)
             .single();
 
           if (profileError) {
@@ -65,7 +68,7 @@ export default function ProfilePage() {
               const { error: insertError } = await supabase
                 .from("users")
                 .insert({
-                  id: session.user.id,
+                  id: userId,
                   email: session.user.email,
                   full_name: session.user.email?.split('@')[0] || 'User',
                 });
@@ -75,7 +78,7 @@ export default function ProfilePage() {
                 const { data: newProfile } = await supabase
                   .from("users")
                   .select("*")
-                  .eq("id", session.user.id)
+                  .eq("id", userId)
                   .single();
                 
                 setProfile(newProfile);
@@ -99,14 +102,15 @@ export default function ProfilePage() {
 
           setLoading(false);
           return; // Success, exit retry loop
-        } catch (err: any) {
+        } catch (err: unknown) {
+          const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
           if (attempt < retries) {
             console.warn(`Profile load attempt ${attempt} failed, retrying...`, err);
             await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
             continue;
           }
           console.error("Error loading profile:", err);
-          setStatus("Failed to load profile");
+          setStatus(`Failed to load profile: ${errorMessage}`);
           setLoading(false);
         }
       }

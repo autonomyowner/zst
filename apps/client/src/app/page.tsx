@@ -71,14 +71,15 @@ export default function LandingPage() {
         setListings(filteredData as ListingWithProduct[])
         setLoading(false)
         return // Success, exit retry loop
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (attempt < retries) {
           console.warn(`Listings fetch attempt ${attempt} failed, retrying...`, err)
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
           continue
         }
+        const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred while loading products.'
         console.error('Error:', err)
-        setError('An unexpected error occurred while loading products.')
+        setError(errorMessage)
         setLoading(false)
       }
     }
@@ -108,14 +109,15 @@ export default function LandingPage() {
 
         setCategories(data || [])
         return // Success, exit retry loop
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (attempt < retries) {
           console.warn(`Categories fetch attempt ${attempt} failed, retrying...`, err)
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
           continue
         }
+        const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred while loading categories.'
         console.error('Error:', err)
-        setError('An unexpected error occurred while loading categories.')
+        setError(errorMessage)
       }
     }
   }, [user]) // Refetch when auth state changes

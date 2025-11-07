@@ -67,18 +67,23 @@ export default function CheckoutPage() {
     }
   }
 
-  const getErrorMessage = (error: any): string => {
+  const getErrorMessage = (error: unknown): string => {
     if (!error) return 'Unknown error occurred'
     if (typeof error === 'string') return error
-    if (error.message) return error.message
-    if (error.error_description) return error.error_description
-    if (error.details) return error.details
-    if (error.hint) return error.hint
-    // Try to stringify if it's an object
-    try {
-      const errorStr = JSON.stringify(error)
-      if (errorStr !== '{}') return errorStr
-    } catch {}
+    if (error && typeof error === 'object') {
+      const err = error as Record<string, unknown>
+      if (err.message && typeof err.message === 'string') return err.message
+      if (err.error_description && typeof err.error_description === 'string') return err.error_description
+      if (err.details && typeof err.details === 'string') return err.details
+      if (err.hint && typeof err.hint === 'string') return err.hint
+      // Try to stringify if it's an object
+      try {
+        const errorStr = JSON.stringify(error)
+        if (errorStr !== '{}') return errorStr
+      } catch {
+        // Ignore JSON stringify errors
+      }
+    }
     return 'Failed to place order. Please try again.'
   }
 

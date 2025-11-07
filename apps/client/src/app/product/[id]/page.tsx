@@ -56,7 +56,7 @@ export default function ProductDetailPage() {
         setListing(data as ListingWithProduct)
         setLoading(false)
         return // Success, exit retry loop
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (attempt < retries) {
           console.warn(`Listing fetch attempt ${attempt} failed, retrying...`, err)
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt))

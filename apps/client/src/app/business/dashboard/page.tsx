@@ -109,8 +109,8 @@ export default function BusinessDashboardPage() {
         console.error('Error fetching B2C orders:', b2cError)
       } else {
         // Filter orders that contain seller's listings
-        sellerB2cOrders = (b2cOrdersData || []).filter((order: any) =>
-          order.items?.some((item: any) => item.listing?.seller_id === profile.id)
+        sellerB2cOrders = (b2cOrdersData || []).filter((order: OrderB2CWithItems) =>
+          order.items?.some((item) => item.listing?.seller_id === profile.id)
         ) as OrderB2CWithItems[]
         setB2cOrders(sellerB2cOrders)
       }
@@ -150,9 +150,10 @@ export default function BusinessDashboardPage() {
 
       // Calculate statistics
       calculateStatistics(fetchedListings, sellerB2cOrders, sellerB2bOrders)
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard data'
       console.error('Error fetching dashboard data:', err)
-      setError(err.message || 'Failed to load dashboard data')
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }

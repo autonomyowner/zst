@@ -186,8 +186,9 @@ export default function MyListingsPage() {
       if (imageFile) {
         try {
           imageUrl = await uploadProductImage(imageFile, user.id)
-        } catch (uploadError: any) {
-          alert(uploadError.message || 'Failed to upload image. Please try again.')
+        } catch (uploadError: unknown) {
+          const errorMessage = uploadError instanceof Error ? uploadError.message : 'Failed to upload image. Please try again.'
+          alert(errorMessage)
           setUploadingImage(false)
           return
         }
@@ -203,7 +204,12 @@ export default function MyListingsPage() {
 
       if (editingListing) {
         // Update existing product
-        const productUpdateData: any = {
+        const productUpdateData: {
+          name: string
+          description: string | null
+          category_id: number
+          image_url?: string
+        } = {
           name: formData.productName.trim(),
           description: formData.productDescription.trim() || null,
           category_id: parseInt(formData.categoryId),
