@@ -12,9 +12,6 @@ import TopHeader from "@/components/business/TopHeader"
 import GetStarted from "@/components/business/GetStarted"
 import OverviewDashboard from "@/components/business/OverviewDashboard"
 
-// Force dynamic rendering to prevent caching
-export const dynamic = 'force-dynamic'
-
 interface Statistics {
   totalListings: number
   totalOrders: number

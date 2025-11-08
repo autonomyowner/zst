@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 
-// Force dynamic rendering to prevent caching
-export const dynamic = 'force-dynamic'
-
 interface UserProfile {
   id: string;
   email: string | null;
@@ -225,13 +222,13 @@ export default function ProfilePage() {
             </p>
           </div>
           <button
-            onClick={() => router.push("/rooms")}
+            onClick={() => router.push("/")}
             className="inline-flex items-center gap-2 rounded-md px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border border-black/15 bg-white/60 hover:bg-white/80 min-h-[44px] self-start sm:self-auto"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="hidden sm:inline">Back to Rooms</span>
+            <span className="hidden sm:inline">Back to Home</span>
             <span className="sm:hidden">Back</span>
           </button>
         </div>
@@ -346,7 +343,7 @@ export default function ProfilePage() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/rooms")}
+                onClick={() => router.push("/")}
                 className="sm:flex-none inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold border border-black/15 bg-white/60 hover:bg-white/80 min-h-[44px] text-sm sm:text-base"
               >
                 Cancel

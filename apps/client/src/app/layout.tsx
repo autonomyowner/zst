@@ -20,10 +20,6 @@ export const metadata: Metadata = {
   description: "Quality Products, Trusted Suppliers - Find everything you need for your business from verified global suppliers",
 };
 
-// Force dynamic rendering to prevent caching
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
 export default function RootLayout({
   children,
 }: Readonly<{

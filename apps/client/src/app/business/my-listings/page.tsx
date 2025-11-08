@@ -9,9 +9,6 @@ import { useAuth } from "@/contexts/AuthContext"
 import { uploadProductImage } from "@/lib/storage"
 import type { ListingWithProduct, Category, TargetRole } from "@/types/database"
 
-// Force dynamic rendering to prevent caching
-export const dynamic = 'force-dynamic'
-
 export default function MyListingsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
