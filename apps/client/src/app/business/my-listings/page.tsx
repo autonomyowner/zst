@@ -147,6 +147,28 @@ export default function MyListingsPage() {
     }
   }
 
+  // Helper function to trigger cache revalidation
+  const revalidateCache = async (listingId?: number) => {
+    const revalidationToken = process.env.NEXT_PUBLIC_REVALIDATION_TOKEN
+    if (!revalidationToken) {
+      console.warn('REVALIDATION_TOKEN not set, skipping cache revalidation')
+      return
+    }
+
+    try {
+      // Revalidate homepage
+      await fetch(`/api/revalidate?secret=${revalidationToken}&path=/`)
+      
+      // Revalidate product detail page if we have a listing ID
+      if (listingId) {
+        await fetch(`/api/revalidate?secret=${revalidationToken}&path=/product/${listingId}`)
+      }
+    } catch (error) {
+      // Don't block user flow if revalidation fails
+      console.error('Cache revalidation failed:', error)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!supabase || !profile || !user) return
@@ -181,6 +203,7 @@ export default function MyListingsPage() {
     try {
       setUploadingImage(true)
       let imageUrl: string | null = null
+      let listingId: number | undefined = editingListing?.id
 
       // Upload new image if provided
       if (imageFile) {
@@ -270,7 +293,7 @@ export default function MyListingsPage() {
         }
 
         // Create new listing
-        const { error: listingError } = await supabase
+        const { data: newListing, error: listingError } = await supabase
           .from('listings')
           .insert({
             product_id: newProduct.id,
@@ -279,13 +302,17 @@ export default function MyListingsPage() {
             stock_quantity: parseInt(formData.stock_quantity),
             target_role: targetRole,
           })
+          .select()
+          .single()
 
-        if (listingError) {
+        if (listingError || !newListing) {
           console.error('Error creating listing:', listingError)
           alert('Failed to create listing. Please try again.')
           setUploadingImage(false)
           return
         }
+
+        listingId = newListing.id
       }
 
       // Reset form and refresh
@@ -297,6 +324,9 @@ export default function MyListingsPage() {
       setEditingListing(null)
       setUploadingImage(false)
       await fetchListings()
+      
+      // Trigger cache revalidation
+      await revalidateCache(listingId)
       
       // Show success message
       if (editingListing) {
@@ -348,6 +378,9 @@ export default function MyListingsPage() {
       }
 
       await fetchListings()
+      
+      // Trigger cache revalidation
+      await revalidateCache(listingId)
     } catch (error) {
       console.error('Error:', error)
       alert('An error occurred. Please try again.')
