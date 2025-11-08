@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import { uploadProductImage } from "@/lib/storage"
 import type { ListingWithProduct, Category, TargetRole } from "@/types/database"
 
-export default function MyListingsPage() {
+function MyListingsBody() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, profile, loading: authLoading } = useAuth()
@@ -650,6 +650,20 @@ export default function MyListingsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function MyListingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="animate-pulse">
+          <div className="h-6 sm:h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+        </div>
+      </div>
+    }>
+      <MyListingsBody />
+    </Suspense>
   )
 }
 
