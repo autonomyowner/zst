@@ -7,23 +7,28 @@ import ProductClient from './ProductClient'
 export const revalidate = 3600
 
 async function getProduct(id: string): Promise<ListingWithProduct | null> {
-  const supabase = await createServerComponentClient()
-  
-  const { data, error } = await supabase
-    .from('listings')
-    .select(`
-      *,
-      product:products(*, category:categories(*))
-    `)
-    .eq('id', id)
-    .eq('target_role', 'customer')
-    .single()
+  try {
+    const supabase = await createServerComponentClient()
+    
+    const { data, error } = await supabase
+      .from('listings')
+      .select(`
+        *,
+        product:products(*, category:categories(*))
+      `)
+      .eq('id', id)
+      .eq('target_role', 'customer')
+      .single()
 
-  if (error || !data) {
+    if (error || !data) {
+      return null
+    }
+
+    return data as ListingWithProduct
+  } catch (error) {
+    console.error('Error in getProduct:', error)
     return null
   }
-
-  return data as ListingWithProduct
 }
 
 export default async function ProductDetailPage({

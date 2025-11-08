@@ -6,46 +6,56 @@ import HomePageClient from './HomePageClient'
 export const revalidate = 300
 
 async function getListings(): Promise<ListingWithProduct[]> {
-  const supabase = await createServerComponentClient()
-  
-  const { data, error } = await supabase
-    .from('listings')
-    .select(`
-      *,
-      product:products(*, category:categories(*))
-    `)
-    .eq('target_role', 'customer')
-    .gt('stock_quantity', 0)
-    .order('created_at', { ascending: false })
-    .limit(100)
+  try {
+    const supabase = await createServerComponentClient()
+    
+    const { data, error } = await supabase
+      .from('listings')
+      .select(`
+        *,
+        product:products(*, category:categories(*))
+      `)
+      .eq('target_role', 'customer')
+      .gt('stock_quantity', 0)
+      .order('created_at', { ascending: false })
+      .limit(100)
 
-  if (error) {
-    console.error('Error fetching listings:', error)
+    if (error) {
+      console.error('Error fetching listings:', error)
+      return []
+    }
+
+    // Filter to ensure only customer listings
+    const filteredData = (data || []).filter((listing: ListingWithProduct) => {
+      return listing.target_role === 'customer'
+    })
+
+    return filteredData as ListingWithProduct[]
+  } catch (error) {
+    console.error('Error in getListings:', error)
     return []
   }
-
-  // Filter to ensure only customer listings
-  const filteredData = (data || []).filter((listing: ListingWithProduct) => {
-    return listing.target_role === 'customer'
-  })
-
-  return filteredData as ListingWithProduct[]
 }
 
 async function getCategories(): Promise<Category[]> {
-  const supabase = await createServerComponentClient()
-  
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name')
+  try {
+    const supabase = await createServerComponentClient()
+    
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name')
 
-  if (error) {
-    console.error('Error fetching categories:', error)
+    if (error) {
+      console.error('Error fetching categories:', error)
+      return []
+    }
+
+    return (data || []) as Category[]
+  } catch (error) {
+    console.error('Error in getCategories:', error)
     return []
   }
-
-  return (data || []) as Category[]
 }
 
 export default async function LandingPage() {
