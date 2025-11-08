@@ -1,15 +1,12 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 import type { ListingWithProduct } from "@/types/database"
 
-// Force dynamic rendering to prevent caching
-export const dynamic = 'force-dynamic'
-
-export default function CheckoutPage() {
+function CheckoutBody() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const listingId = searchParams.get('listing')
@@ -348,6 +345,21 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-2xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 sm:h-8 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-48 sm:h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    }>
+      <CheckoutBody />
+    </Suspense>
   )
 }
 
