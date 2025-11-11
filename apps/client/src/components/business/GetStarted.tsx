@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/OptimizedAuthContext'
 
 interface GetStartedProps {
   balance?: number
@@ -87,7 +87,7 @@ export default function GetStarted({ balance = 0, hasProducts = false, onActivat
     {
       id: 'activate',
       title: 'Activate your store',
-      description: 'Add $1 to your balance to activate your store and kickstart your e-commerce journey!',
+      description: 'Add DA 1 to your balance to activate your store and kickstart your e-commerce journey!',
       action: handleActivateStore,
       actionLabel: 'Activate your store now!',
       completed: completedSteps.has('activate'),
@@ -186,5 +186,12 @@ export default function GetStarted({ balance = 0, hasProducts = false, onActivat
     </div>
   )
 }
+
+
+
+
+
+
+
 
 

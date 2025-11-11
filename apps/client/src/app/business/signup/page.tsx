@@ -4,13 +4,13 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/OptimizedAuthContext"
 import AuthLoadingSpinner from "@/components/AuthLoadingSpinner"
 import type { UserRole } from "@/types/database"
 
 export default function BusinessSignupPage() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,10 +22,10 @@ export default function BusinessSignupPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && profile) {
       router.replace("/business/dashboard")
     }
-  }, [user, authLoading, router])
+  }, [user, profile, authLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -245,120 +245,119 @@ export default function BusinessSignupPage() {
 
   // Show loading while checking auth state
   if (authLoading) {
-    return <AuthLoadingSpinner message="Checking session…" />
+    return <AuthLoadingSpinner message="Loading..." />
   }
 
   // Don't show form if already logged in (will redirect)
-  if (user) {
+  if (user && profile) {
     return <AuthLoadingSpinner message="You're already logged in! Redirecting..." />
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-2 sm:px-4 py-4 sm:py-8">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2">Business Sign Up</h1>
-          <p className="text-sm sm:text-base text-gray-600">Create your business account</p>
+    <main className="relative">
+      <div
+        aria-hidden
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundColor: '#fff8dc',
+          backgroundImage: 'radial-gradient(rgba(201,162,39,0.6) 1px, transparent 1px)',
+          backgroundSize: '36px 36px',
+          backgroundPosition: '0 0',
+        }}
+      />
+      <section className="max-w-md mx-auto space-y-4 sm:space-y-6 px-4">
+        <div className="text-center space-y-2 text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Business Sign Up</h1>
+          <p className="text-slate-700 text-xs sm:text-sm">Create your business account and start selling</p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-xs sm:text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              required
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base min-h-[44px]"
-              placeholder="your@email.com"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              required
-              minLength={6}
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base min-h-[44px]"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="business_name" className="block text-sm font-medium text-gray-700 mb-1">
-              Business Name
-            </label>
-            <input
-              type="text"
-              id="business_name"
-              required
-              value={formData.business_name}
-              onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base min-h-[44px]"
-              placeholder="Your Business Name"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-              Business Type
-            </label>
-            <select
-              id="role"
-              required
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
-              className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm sm:text-base min-h-[44px]"
+        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6 text-slate-900">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="your@business.com"
+                className="w-full rounded-md border border-black/20 bg-white/70 p-2 sm:p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
+                required
+                disabled={submitting}
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Enter your password"
+                className="w-full rounded-md border border-black/20 bg-white/70 p-2 sm:p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
+                required
+                minLength={6}
+                disabled={submitting}
+              />
+            </div>
+            <div>
+              <label htmlFor="business_name" className="block text-sm font-medium mb-1">Business Name</label>
+              <input
+                id="business_name"
+                type="text"
+                value={formData.business_name}
+                onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
+                placeholder="Your business name"
+                className="w-full rounded-md border border-black/20 bg-white/70 p-2 sm:p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
+                required
+                disabled={submitting}
+              />
+            </div>
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium mb-1">Business Type</label>
+              <select
+                id="role"
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+                className="w-full rounded-md border border-black/20 bg-white/70 p-2 sm:p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
+                required
+                disabled={submitting}
+              >
+                <option value="retailer">Retailer</option>
+                <option value="wholesaler">Wholesaler</option>
+                <option value="importer">Importer</option>
+              </select>
+              <p className="text-xs text-slate-600 mt-2">
+                Choose your business type to access relevant marketplace features
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={submitting || authLoading}
+              aria-label="Create business account"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm sm:text-base transition-all duration-250"
             >
-              <option value="retailer">Retailer</option>
-              <option value="wholesaler">Wholesaler</option>
-              <option value="importer">Importer</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              Select your business type to access the appropriate marketplace
-            </p>
-          </div>
+              {submitting ? "Creating account…" : "Create Account"}
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={submitting || authLoading}
-            className="w-full bg-black text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base min-h-[44px]"
-          >
-            {submitting ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
+          {error && (
+            <div className="mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800">
+              <p className="text-sm font-medium" role="status">{error}</p>
+            </div>
+          )}
+        </div>
 
-        <div className="mt-4 sm:mt-6 text-center">
-          <p className="text-xs sm:text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link href="/business/login" className="text-black font-medium hover:underline min-h-[44px] inline-flex items-center">
-              Sign in
-            </Link>
+        <div className="text-center space-y-2">
+          <p className="text-xs sm:text-sm text-slate-800">
+            Already have an account? <Link href="/business/login" className="underline underline-offset-4 min-h-[44px] inline-flex items-center hover:text-slate-600 transition-colors">Sign in</Link>
+          </p>
+          <p className="text-xs sm:text-sm">
+            <Link href="/" className="text-slate-600 hover:text-slate-900 underline underline-offset-2 inline-flex items-center min-h-[44px] transition-colors">← Back to shopping</Link>
           </p>
         </div>
-
-        <div className="mt-3 sm:mt-4 text-center">
-          <Link href="/" className="text-xs sm:text-sm text-gray-600 hover:text-black min-h-[44px] inline-flex items-center">
-            ← Back to Shopping
-          </Link>
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   )
 }
 

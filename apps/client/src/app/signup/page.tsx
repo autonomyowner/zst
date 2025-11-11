@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase, supabaseConfigured } from "../../lib/supabase"
 import { useSearchParams } from "next/navigation"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/OptimizedAuthContext"
 import AuthLoadingSpinner from "@/components/AuthLoadingSpinner"
 
 function SignupPageInner() {
@@ -20,7 +20,7 @@ function SignupPageInner() {
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      router.replace("/rooms")
+      router.replace("/")
     }
   }, [user, authLoading, router])
 
@@ -30,7 +30,7 @@ function SignupPageInner() {
     // Prevent submission if already logged in
     if (user) {
       setStatus("You're already logged in! Redirecting...")
-      router.replace("/rooms")
+      router.replace("/")
       return
     }
 
@@ -84,7 +84,7 @@ function SignupPageInner() {
     } else if (data.session) {
       // Auto-login successful (email confirmation disabled)
       setStatus("✅ Account created! Redirecting...")
-      setTimeout(() => router.replace("/rooms"), 1500)
+      setTimeout(() => router.replace("/"), 1500)
     }
   }
 
@@ -125,9 +125,9 @@ function SignupPageInner() {
           <div className="text-xs uppercase tracking-wide text-slate-600 mb-2">Choose a starting plan</div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {[
-              { id: 'creator', label: 'Creator', note: '$7/mo' },
-              { id: 'pro', label: 'Pro', note: '$29/mo' },
-              { id: 'team', label: 'Team', note: '$79/mo' },
+              { id: 'creator', label: 'Creator', note: 'DA 7/mo' },
+              { id: 'pro', label: 'Pro', note: 'DA 29/mo' },
+              { id: 'team', label: 'Team', note: 'DA 79/mo' },
             ].map((p) => (
               <button
                 key={p.id}

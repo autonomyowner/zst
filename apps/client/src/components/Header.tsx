@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/OptimizedAuthContext'
 
 export default function Header() {
   const pathname = usePathname()
@@ -13,12 +13,12 @@ export default function Header() {
 
   const isB2BPage = pathname?.startsWith('/business')
   const isAdminPage = pathname?.startsWith('/admin')
-  const isPublicPage = !isB2BPage && !isAdminPage
+  const isImporterPage = pathname?.startsWith('/importer')
+  const isWholesalerPage = pathname?.startsWith('/wholesaler')
+  const isRetailerPage = pathname?.startsWith('/retailer')
+  const isPublicPage = !isB2BPage && !isAdminPage && !isImporterPage && !isWholesalerPage && !isRetailerPage
 
-  // Don't show header on B2B auth pages
-  if (isB2BPage && (pathname === '/business/login' || pathname === '/business/signup')) {
-    return null
-  }
+  // Show header on all pages (including business login/signup)
 
   // Admin Header
   if (isAdminPage && user && profile?.role === 'admin') {
@@ -87,6 +87,84 @@ export default function Header() {
                   setMobileMenuOpen(false)
                 }}
                 className="w-full text-left px-4 py-3 border border-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 min-h-[44px]"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Business Portal Header for importer/wholesaler/retailer pages
+  if ((isImporterPage || isWholesalerPage || isRetailerPage) && user && profile) {
+    return (
+      <div className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Link href={isImporterPage ? "/importer/dashboard" : isWholesalerPage ? "/wholesaler/dashboard" : "/retailer/dashboard"} className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+              <Image
+                src="/logo.png"
+                alt="ZST Logo"
+                width={120}
+                height={120}
+                className="object-contain w-16 h-16 md:w-24 md:h-24"
+              />
+            </Link>
+            <div className="flex items-center gap-2 md:gap-4">
+              {profile && (
+                <span className="text-xs md:text-sm text-gray-600 hidden md:inline">
+                  {profile.business_name || profile.email}
+                </span>
+              )}
+              <Link
+                href="/"
+                className="hidden md:inline-block px-4 py-2 text-black hover:text-gray-600 font-medium min-h-[44px] flex items-center"
+              >
+                Shopping
+              </Link>
+              <button
+                onClick={async () => {
+                  await signOut()
+                  window.location.href = '/login'
+                }}
+                className="hidden md:inline-block px-4 py-2 border border-gray-300 text-black font-medium rounded-lg hover:bg-gray-50 min-h-[44px]"
+              >
+                Sign Out
+              </button>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 text-black hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? (
+                  <span>✕</span>
+                ) : (
+                  <span>☰</span>
+                )}
+              </button>
+            </div>
+          </div>
+          {mobileMenuOpen && (
+            <div className="md:hidden mt-4 pb-4 border-t border-gray-200 pt-4 space-y-3">
+              {profile && (
+                <div className="text-sm text-gray-600 px-2">{profile.business_name || profile.email}</div>
+              )}
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-3 text-black hover:bg-gray-50 rounded-lg font-medium min-h-[44px] flex items-center"
+              >
+                Shopping
+              </Link>
+              <button
+                onClick={async () => {
+                  await signOut()
+                  window.location.href = '/login'
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left px-4 py-3 border border-gray-300 text-black font-medium rounded-lg hover:bg-gray-50 min-h-[44px]"
               >
                 Sign Out
               </button>
@@ -221,6 +299,16 @@ export default function Header() {
             />
           </Link>
 
+          {/* Center Navigation - Desktop */}
+          <div className="hidden md:flex items-center justify-center flex-1">
+            <Link 
+              href="/services" 
+              className="text-black hover:text-gray-600 font-medium min-h-[44px] flex items-center px-4"
+            >
+              Services
+            </Link>
+          </div>
+
           {/* Right Side Utilities - Desktop */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6">
             {/* Sell Product Link */}
@@ -241,6 +329,15 @@ export default function Header() {
                   <span className="text-sm text-gray-600">
                     {profile.business_name || profile.email}
                   </span>
+                )}
+                {/* Show My Orders for normal users */}
+                {profile?.role === 'normal_user' && (
+                  <Link
+                    href="/my-orders"
+                    className="px-4 py-2 text-black hover:text-gray-600 font-medium min-h-[44px] flex items-center"
+                  >
+                    My Orders
+                  </Link>
                 )}
                 <button
                   onClick={async () => {
@@ -291,18 +388,38 @@ export default function Header() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-gray-200 pt-4 space-y-3">
+            <Link
+              href="/services"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-4 py-3 text-black hover:bg-gray-50 rounded-lg font-medium min-h-[44px] flex items-center"
+            >
+              Services
+            </Link>
             {user ? (
               <>
                 {profile && (
                   <div className="text-sm text-gray-600 px-2">{profile.business_name || profile.email}</div>
                 )}
-                <Link
-                  href="/business/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-3 text-black hover:bg-gray-50 rounded-lg font-medium min-h-[44px] flex items-center"
-                >
-                  Business Dashboard
-                </Link>
+                {/* Show My Orders for normal users */}
+                {profile?.role === 'normal_user' && (
+                  <Link
+                    href="/my-orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-3 text-black hover:bg-gray-50 rounded-lg font-medium min-h-[44px] flex items-center"
+                  >
+                    My Orders
+                  </Link>
+                )}
+                {/* Show Business Dashboard for business users */}
+                {(profile?.role === 'importer' || profile?.role === 'wholesaler' || profile?.role === 'retailer') && (
+                  <Link
+                    href="/business/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-3 text-black hover:bg-gray-50 rounded-lg font-medium min-h-[44px] flex items-center"
+                  >
+                    Business Dashboard
+                  </Link>
+                )}
                 <button
                   onClick={async () => {
                     await signOut()

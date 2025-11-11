@@ -4,32 +4,50 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
-import { isAdmin } from "@/lib/auth"
+import { useAuth } from "@/contexts/OptimizedAuthContext"
+import AuthLoadingSpinner from "@/components/AuthLoadingSpinner"
 import type { Profile, UserRole } from "@/types/database"
-
-// Force dynamic rendering to prevent caching
-export const dynamic = 'force-dynamic'
+import { getRoleDisplayName } from "@/lib/role-utils"
 
 export default function AdminUsersPage() {
   const router = useRouter()
+  const { user, profile, loading: authLoading } = useAuth()
   const [users, setUsers] = useState<Profile[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [editingUser, setEditingUser] = useState<Profile | null>(null)
-  const [newRole, setNewRole] = useState<UserRole>('retailer')
+  const [newRole, setNewRole] = useState<UserRole>('normal_user')
+  const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    checkAuthAndLoadUsers()
-  }, [])
+    if (!authLoading) {
+      if (!user || profile?.role !== 'admin') {
+        router.push('/admin/login')
+        return
+      }
+      fetchUsers()
+    }
+  }, [user, profile, authLoading, router])
 
-  const checkAuthAndLoadUsers = async () => {
-    const admin = await isAdmin()
-    if (!admin) {
-      router.push('/admin/login')
-      return
+  useEffect(() => {
+    // Apply filters
+    let filtered = users
+
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter(u => u.role === roleFilter)
     }
 
-    await fetchUsers()
-  }
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(u =>
+        u.email.toLowerCase().includes(query) ||
+        u.business_name?.toLowerCase().includes(query)
+      )
+    }
+
+    setFilteredUsers(filtered)
+  }, [users, roleFilter, searchQuery])
 
   const fetchUsers = async () => {
     if (!supabase) return
@@ -82,15 +100,79 @@ export default function AdminUsersPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
-        <div className="animate-pulse">
-          <div className="h-6 sm:h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="h-48 sm:h-64 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    )
+  const handleToggleBan = async (user: Profile) => {
+    if (!supabase) return
+
+    const confirmMessage = user.is_banned
+      ? `Are you sure you want to UNBAN ${user.email}?`
+      : `Are you sure you want to BAN ${user.email}? They will lose all access to the platform.`
+
+    if (!confirm(confirmMessage)) return
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_banned: !user.is_banned })
+        .eq('id', user.id)
+
+      if (error) {
+        console.error('Error toggling ban status:', error)
+        alert('Failed to update ban status. Please try again.')
+        return
+      }
+
+      await fetchUsers()
+    } catch (error) {
+      console.error('Error:', error)
+      alert('An error occurred. Please try again.')
+    }
+  }
+
+  const handleDeleteUser = async (user: Profile) => {
+    if (!supabase) return
+
+    const confirmMessage = `Are you sure you want to DELETE ${user.email}? This action CANNOT be undone!`
+    if (!confirm(confirmMessage)) return
+
+    try {
+      // Deleting from profiles will cascade to auth.users due to foreign key
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', user.id)
+
+      if (error) {
+        console.error('Error deleting user:', error)
+        alert('Failed to delete user. Please try again.')
+        return
+      }
+
+      await fetchUsers()
+    } catch (error) {
+      console.error('Error:', error)
+      alert('An error occurred. Please try again.')
+    }
+  }
+
+  const getRoleBadgeColor = (role: UserRole) => {
+    switch (role) {
+      case 'admin':
+        return 'bg-purple-100 text-purple-800'
+      case 'importer':
+        return 'bg-blue-100 text-blue-800'
+      case 'wholesaler':
+        return 'bg-green-100 text-green-800'
+      case 'retailer':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'normal_user':
+        return 'bg-gray-100 text-gray-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  if (authLoading || loading) {
+    return <AuthLoadingSpinner />
   }
 
   return (
@@ -105,7 +187,35 @@ export default function AdminUsersPage() {
         </Link>
       </div>
 
-      {users.length === 0 ? (
+      {/* Filters */}
+      <div className="mb-6 space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <input
+            type="text"
+            placeholder="Search by email or business name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as UserRole | 'all')}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="importer">Importer</option>
+            <option value="wholesaler">Wholesaler</option>
+            <option value="retailer">Retailer</option>
+            <option value="normal_user">Normal User</option>
+          </select>
+        </div>
+        <p className="text-sm text-gray-600">
+          Showing {filteredUsers.length} of {users.length} users
+        </p>
+      </div>
+
+      {filteredUsers.length === 0 ? (
         <div className="text-center py-8 sm:py-12">
           <p className="text-gray-500 text-base sm:text-lg">No users found.</p>
         </div>
@@ -126,6 +236,9 @@ export default function AdminUsersPage() {
                     Role
                   </th>
                   <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
                   </th>
                   <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -134,8 +247,8 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                {filteredUsers.map((user) => (
+                  <tr key={user.id} className={`hover:bg-gray-50 ${user.is_banned ? 'bg-red-50' : ''}`}>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {user.email}
                     </td>
@@ -143,14 +256,20 @@ export default function AdminUsersPage() {
                       {user.business_name || '-'}
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                        user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                        user.role === 'importer' ? 'bg-blue-100 text-blue-800' :
-                        user.role === 'wholesaler' ? 'bg-green-100 text-green-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {user.role}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+                        {getRoleDisplayName(user.role)}
                       </span>
+                    </td>
+                    <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm">
+                      {user.is_banned ? (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Banned
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Active
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(user.created_at).toLocaleDateString()}
@@ -161,8 +280,9 @@ export default function AdminUsersPage() {
                           <select
                             value={newRole}
                             onChange={(e) => setNewRole(e.target.value as UserRole)}
-                            className="px-2 sm:px-3 py-1 border border-gray-300 rounded-lg text-xs sm:text-sm min-h-[44px]"
+                            className="px-2 sm:px-3 py-1 border border-gray-300 rounded-lg text-xs sm:text-sm min-h-[40px]"
                           >
+                            <option value="normal_user">Normal User</option>
                             <option value="retailer">Retailer</option>
                             <option value="wholesaler">Wholesaler</option>
                             <option value="importer">Importer</option>
@@ -170,24 +290,42 @@ export default function AdminUsersPage() {
                           </select>
                           <button
                             onClick={handleSaveRole}
-                            className="px-2 sm:px-3 py-1 bg-green-600 text-white rounded-lg text-xs sm:text-sm hover:bg-green-700 min-h-[44px]"
+                            className="px-2 sm:px-3 py-1 bg-green-600 text-white rounded-lg text-xs sm:text-sm hover:bg-green-700 min-h-[40px]"
                           >
                             Save
                           </button>
                           <button
                             onClick={() => setEditingUser(null)}
-                            className="px-2 sm:px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-xs sm:text-sm hover:bg-gray-300 min-h-[44px]"
+                            className="px-2 sm:px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-xs sm:text-sm hover:bg-gray-300 min-h-[40px]"
                           >
                             Cancel
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleEditRole(user)}
-                          className="px-2 sm:px-3 py-1 bg-yellow-400 text-black rounded-lg text-xs sm:text-sm hover:bg-yellow-300 min-h-[44px]"
-                        >
-                          Edit Role
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEditRole(user)}
+                            className="px-2 sm:px-3 py-1 bg-blue-600 text-white rounded-lg text-xs sm:text-sm hover:bg-blue-700 min-h-[40px]"
+                          >
+                            Edit Role
+                          </button>
+                          <button
+                            onClick={() => handleToggleBan(user)}
+                            className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm min-h-[40px] ${
+                              user.is_banned
+                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-red-600 text-white hover:bg-red-700'
+                            }`}
+                          >
+                            {user.is_banned ? 'Unban' : 'Ban'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user)}
+                            className="px-2 sm:px-3 py-1 bg-gray-800 text-white rounded-lg text-xs sm:text-sm hover:bg-gray-900 min-h-[40px]"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -198,8 +336,13 @@ export default function AdminUsersPage() {
 
           {/* Mobile Card Layout */}
           <div className="md:hidden space-y-3">
-            {users.map((user) => (
-              <div key={user.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+            {filteredUsers.map((user) => (
+              <div
+                key={user.id}
+                className={`border border-gray-200 rounded-lg p-4 space-y-3 ${
+                  user.is_banned ? 'bg-red-50' : 'bg-white'
+                }`}
+              >
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Email</p>
                   <p className="text-sm font-medium text-gray-900 break-words">{user.email}</p>
@@ -211,19 +354,26 @@ export default function AdminUsersPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Role</p>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                      user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                      user.role === 'importer' ? 'bg-blue-100 text-blue-800' :
-                      user.role === 'wholesaler' ? 'bg-green-100 text-green-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {user.role}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+                      {getRoleDisplayName(user.role)}
                     </span>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">Created</p>
-                    <p className="text-xs text-gray-500">{new Date(user.created_at).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-500 mb-1">Status</p>
+                    {user.is_banned ? (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Banned
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    )}
                   </div>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Created</p>
+                  <p className="text-xs text-gray-500">{new Date(user.created_at).toLocaleDateString()}</p>
                 </div>
                 <div>
                   {editingUser?.id === user.id ? (
@@ -233,6 +383,7 @@ export default function AdminUsersPage() {
                         onChange={(e) => setNewRole(e.target.value as UserRole)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm min-h-[44px]"
                       >
+                        <option value="normal_user">Normal User</option>
                         <option value="retailer">Retailer</option>
                         <option value="wholesaler">Wholesaler</option>
                         <option value="importer">Importer</option>
@@ -254,12 +405,30 @@ export default function AdminUsersPage() {
                       </div>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => handleEditRole(user)}
-                      className="w-full px-3 py-2 bg-yellow-400 text-black rounded-lg text-sm hover:bg-yellow-300 min-h-[44px]"
-                    >
-                      Edit Role
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => handleEditRole(user)}
+                        className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 min-h-[44px]"
+                      >
+                        Edit Role
+                      </button>
+                      <button
+                        onClick={() => handleToggleBan(user)}
+                        className={`w-full px-3 py-2 rounded-lg text-sm min-h-[44px] ${
+                          user.is_banned
+                            ? 'bg-green-600 text-white hover:bg-green-700'
+                            : 'bg-red-600 text-white hover:bg-red-700'
+                        }`}
+                      >
+                        {user.is_banned ? 'Unban User' : 'Ban User'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteUser(user)}
+                        className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg text-sm hover:bg-gray-900 min-h-[44px]"
+                      >
+                        Delete User
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -270,4 +439,3 @@ export default function AdminUsersPage() {
     </div>
   )
 }
-

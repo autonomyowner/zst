@@ -28,7 +28,7 @@ export default function AuthCallbackPage() {
         await supabase.auth.getUser() // Use getUser() for more reliable state check
         // Optional: support redirect query param
         const url = new URL(window.location.href)
-        const redirect = url.searchParams.get("redirect") || "/rooms"
+        const redirect = url.searchParams.get("redirect") || "/"
         setStatus("Successfully authenticated! Redirecting...")
         // Wait a moment for auth context to update, then navigate
         await new Promise(resolve => setTimeout(resolve, 300))

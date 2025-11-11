@@ -1,0 +1,48 @@
+FILES AND DIRECTORIES TO DELETE FROM ZST MARKETPLACE
+
+IMMEDIATE DELETE - HIGH PRIORITY
+=================================
+
+1. apps/client/src/app/services/page.tsx
+   - Placeholder page, never implemented
+   - Generic "Service 1, 2, 3" cards only
+   - Not linked anywhere
+   
+2. apps/client/src/app/onboarding/
+   - Empty directory from TRAVoices project
+   
+3. apps/client/src/app/vision/
+   - Empty directory from TRAVoices project
+   
+4. apps/client/src/app/ar/vision/
+   - Empty directory from TRAVoices project
+   
+5. apps/client/src/contexts/AuthContext.tsx.backup
+   - Old backup file, replaced by OptimizedAuthContext.tsx
+   - Not imported anywhere
+
+
+OPTIONAL - IF REMOVING EXPRESS SERVER
+======================================
+
+6. apps/server/src/ai.ts
+   - Legacy voice/AI code (generateMapWithAI, transcribeAudio)
+   
+7. apps/server/src/index.ts
+   - Remove lines with voice session endpoints (SSE)
+   - Remove mindmap generation code
+   - Remove mock reasoner functions
+
+
+BUILD CACHE (Optional cleanup)
+==============================
+
+- .next/cache/webpack/client-production/index.pack.old
+- .next/cache/webpack/server-production/index.pack.old
+
+TOTAL DELETIONS: 5 files/directories + 2 optional cache files
+
+AFTER CLEANUP VERIFICATION:
+- npm run lint
+- npm run build  
+- Test /login, /business/login, /admin/login, /ar/login

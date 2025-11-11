@@ -1,8 +1,8 @@
 # Configuration Summary
 
-## Supabase Authentication & Room Management Configuration
+## ZST Marketplace - Supabase Configuration
 
-This document summarizes all the configuration changes made to integrate Supabase authentication and room management into your TRAVoices application.
+This document summarizes the Supabase configuration for the ZST Marketplace platform, including authentication, database schema, and storage setup.
 
 ---
 

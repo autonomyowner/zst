@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import Header from '../Header'
-import { AuthContext } from '@/contexts/AuthContext'
+import { AuthContext } from '@/contexts/OptimizedAuthContext'
 
 // Mock the next/navigation module
 jest.mock('next/navigation', () => ({

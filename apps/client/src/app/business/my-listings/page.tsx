@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/OptimizedAuthContext"
 import { uploadProductImage } from "@/lib/storage"
+import { formatDZD } from "@/lib/utils/currency"
 import type { ListingWithProduct, Category, TargetRole } from "@/types/database"
 
 function MyListingsBody() {
@@ -529,7 +530,7 @@ function MyListingsBody() {
 
             <div>
               <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                Price ($) *
+                Price (DA) *
               </label>
               <input
                 type="number"
@@ -623,7 +624,7 @@ function MyListingsBody() {
               )}
               <h3 className="font-semibold text-base sm:text-lg mb-2 line-clamp-2">{listing.product.name}</h3>
               <p className="text-xl sm:text-2xl font-bold text-black mb-2">
-                ${listing.price.toFixed(2)}
+                {formatDZD(listing.price)}
               </p>
               <p className="text-xs sm:text-sm text-gray-600 mb-2">
                 Stock: {listing.stock_quantity}

@@ -2,7 +2,7 @@
 
 ## Configuration Complete
 
-Your NeuroCanvas application has been configured with the following Supabase credentials:
+Your ZST Marketplace application has been configured with the following Supabase credentials:
 
 - **Project URL**: `https://wwvqkgnqcplzsxvlthib.supabase.co`
 - **Anon Key**: Configured in environment files
@@ -82,50 +82,57 @@ AI_PROVIDER=mock
    npm run dev
    ```
 
-2. Navigate to `/signup` to create a test account
-3. Check your email for the confirmation link
-4. After confirming, log in at `/login`
-5. Visit `/rooms` to create your first voice room
-6. Join a room to test the voice functionality
+2. **Test B2C Shopping**:
+   - Visit `http://localhost:3000`
+   - Browse products on the homepage
+   - Test the checkout flow
+
+3. **Test Business Portal**:
+   - Navigate to `/business/signup` to create a business account
+   - Check your email for the confirmation link
+   - After confirming, log in at `/business/login`
+   - Visit `/business/my-listings` to create product listings
+   - Visit `/business/dashboard` to view available products based on your role
 
 ## Features Implemented
 
 ### Authentication
-- ✅ Email magic link authentication
-- ✅ OAuth support (Google, GitHub)
-- ✅ Password-based signup
+- ✅ Email/password authentication
+- ✅ OAuth support (Google, GitHub - optional)
+- ✅ Role-based access control (importer, wholesaler, retailer, admin)
 - ✅ Auth callback handling
 - ✅ Session persistence
 - ✅ Protected routes
 
-### Room Management
-- ✅ Create voice rooms
-- ✅ List user's rooms
-- ✅ Join rooms with authentication
-- ✅ Room access control via RLS
-- ✅ LiveKit integration for voice
+### E-Commerce Features
+- ✅ B2C public shopping with COD checkout
+- ✅ B2B hierarchical marketplace
+- ✅ Product listings with inventory management
+- ✅ Image uploads to Supabase Storage
+- ✅ Order management (B2C and B2B)
+- ✅ Admin panel for platform management
 
 ### Database Structure
-- ✅ User profiles
-- ✅ Mindmaps storage
-- ✅ Version control for maps
-- ✅ Templates system
-- ✅ Rooms table with owner tracking
+- ✅ User profiles with roles
+- ✅ Products and categories
+- ✅ Listings with stock tracking
+- ✅ B2C and B2B orders
 - ✅ Row Level Security (RLS) policies
+- ✅ Security definer functions to prevent infinite recursion
 
-## API Endpoints
+## API Routes
 
-### Room API
-- `POST /api/rooms/create` - Create a new voice room
-- `GET /api/rooms/list` - List user's rooms
-- `GET /api/livekit/token` - Get LiveKit access token
+### Next.js API Routes
+- `POST /api/revalidate` - On-demand ISR revalidation
+- Direct Supabase access from components (no traditional REST API layer)
 
 ## Security Notes
 
 - All tables have Row Level Security (RLS) enabled
-- Users can only access their own data
-- Rooms are visible to authenticated users but only owners can modify them
-- LiveKit tokens are generated per session with proper scoping
+- Users can only access data appropriate to their role
+- Admin checks use `public.is_admin()` security definer function to prevent infinite recursion
+- Hierarchical access control: Importers → Wholesalers → Retailers → Customers
+- Product images stored in public Supabase Storage bucket with upload restrictions
 
 ## Troubleshooting
 
@@ -138,14 +145,17 @@ AI_PROVIDER=mock
 - Verify the Supabase URL and anon key are correct
 - Check browser console for detailed error messages
 
-### Room Creation Issues
-- Ensure you're logged in
-- Check that the user profile exists (automatically created on first room creation)
-- Verify the database schema includes the rooms table
+### Listing Creation Issues
+- Ensure you're logged in to a business account
+- Check that the user has a valid role (importer, wholesaler, or retailer)
+- Verify the database schema includes the listings and products tables
+- Check that storage bucket `product_images` exists for image uploads
 
 ## Additional Resources
 
 - [Supabase Documentation](https://supabase.com/docs)
-- [LiveKit Documentation](https://docs.livekit.io)
+- [Supabase Auth Guide](https://supabase.com/docs/guides/auth)
+- [Supabase RLS Guide](https://supabase.com/docs/guides/auth/row-level-security)
+- [Supabase Storage Guide](https://supabase.com/docs/guides/storage)
 - [Next.js Documentation](https://nextjs.org/docs)
 

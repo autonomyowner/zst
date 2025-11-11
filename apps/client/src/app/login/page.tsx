@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase, supabaseConfigured } from "../../lib/supabase"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/OptimizedAuthContext"
 import AuthLoadingSpinner from "@/components/AuthLoadingSpinner"
 
 function LoginBody() {
@@ -19,7 +19,7 @@ function LoginBody() {
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      const redirect = params.get("redirect") || "/rooms"
+      const redirect = params.get("redirect") || "/"
       router.replace(redirect)
     }
   }, [user, authLoading, router, params])
@@ -30,7 +30,7 @@ function LoginBody() {
     // Prevent submission if already logged in
     if (user) {
       setStatus("You're already logged in! Redirecting...")
-      const redirect = params.get("redirect") || "/rooms"
+      const redirect = params.get("redirect") || "/"
       router.replace(redirect)
       return
     }
@@ -59,7 +59,7 @@ function LoginBody() {
       }
     } else if (data.session) {
       setStatus("✅ Success! Redirecting...")
-      const redirect = params.get("redirect") || "/rooms"
+      const redirect = params.get("redirect") || "/"
       // Wait a moment for auth context to update, then navigate
       await new Promise(resolve => setTimeout(resolve, 300))
       router.push(redirect)
@@ -70,7 +70,7 @@ function LoginBody() {
   const handleOAuth = async (provider: "google" | "github") => {
     // Prevent OAuth if already logged in
     if (user) {
-      const redirect = params.get("redirect") || "/rooms"
+      const redirect = params.get("redirect") || "/"
       router.replace(redirect)
       return
     }
@@ -137,37 +137,43 @@ function LoginBody() {
           <p className="text-slate-700 text-xs sm:text-sm">Log in with your email and password or continue with your favorite provider.</p>
         </div>
 
-        <div className="rounded-xl border border-black/10 bg-white/70 backdrop-blur p-4 sm:p-6 text-slate-900">
-          <form onSubmit={handleEmailLogin} className="space-y-3">
+        <div className="rounded-xl border-2 border-black/10 bg-white/80 backdrop-blur-sm p-6 sm:p-8 text-slate-900 shadow-lg">
+          <form onSubmit={handleEmailLogin} className="space-y-4" aria-label="Login form">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
+              <label htmlFor="email" className="block text-sm font-semibold mb-2 text-gray-900">Email</label>
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-md border border-black/20 bg-white/70 p-2 sm:p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
+                className="w-full rounded-lg border-2 border-gray-300 bg-white p-3 outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 text-base transition-all duration-200 min-h-[44px]"
                 required
+                aria-required="true"
+                aria-describedby="email-description"
               />
+              <p id="email-description" className="sr-only">Enter your email address</p>
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
+              <label htmlFor="password" className="block text-sm font-semibold mb-2 text-gray-900">Password</label>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full rounded-md border border-black/20 bg-white/70 p-2 sm:p-2 outline-none focus:ring-2 focus:ring-amber-400/50 text-sm sm:text-base min-h-[44px]"
+                className="w-full rounded-lg border-2 border-gray-300 bg-white p-3 outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 text-base transition-all duration-200 min-h-[44px]"
                 required
+                aria-required="true"
+                aria-describedby="password-description"
               />
+              <p id="password-description" className="sr-only">Enter your password</p>
             </div>
             <button
               type="submit"
               disabled={submitting || authLoading}
               aria-label="Log in with email and password"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-semibold text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-500 shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-sm sm:text-base"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-bold text-black bg-gradient-to-r from-yellow-400 to-amber-500 shadow-md hover:shadow-lg hover:from-yellow-300 hover:to-amber-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] text-base transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               {submitting ? "Logging in…" : "Log in"}
             </button>
@@ -179,12 +185,12 @@ function LoginBody() {
             <div className="h-px flex-1 bg-black/10" />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => handleOAuth("google")}
               disabled={submitting || authLoading || !!user}
               aria-label="Continue with Google"
-              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-xs sm:text-sm hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              className="rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] transition-all duration-200 shadow-sm hover:shadow-md"
             >
               Google
             </button>
@@ -192,7 +198,7 @@ function LoginBody() {
               onClick={() => handleOAuth("github")}
               disabled={submitting || authLoading || !!user}
               aria-label="Continue with GitHub"
-              className="rounded-md border border-black/15 bg-white/60 px-3 py-2 text-xs sm:text-sm hover:bg-white/80 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              className="rounded-lg border-2 border-gray-300 bg-white px-4 py-3 text-sm font-medium hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] transition-all duration-200 shadow-sm hover:shadow-md"
             >
               GitHub
             </button>

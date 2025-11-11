@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase, supabaseConfigured } from "@/lib/supabase"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/OptimizedAuthContext"
 import AuthLoadingSpinner from "@/components/AuthLoadingSpinner"
 
 function SignupPageInnerArabic() {
@@ -18,7 +18,7 @@ function SignupPageInnerArabic() {
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      router.replace("/ar/rooms")
+      router.replace("/ar")
     }
   }, [user, authLoading, router])
 
@@ -28,7 +28,7 @@ function SignupPageInnerArabic() {
     // Prevent submission if already logged in
     if (user) {
       setStatus("أنت مسجل الدخول بالفعل! جارى إعادة التوجيه...")
-      router.replace("/ar/rooms")
+      router.replace("/ar")
       return
     }
 
@@ -80,7 +80,7 @@ function SignupPageInnerArabic() {
       setSubmitting(false)
     } else if (data.session) {
       setStatus("✅ تم إنشاء الحساب! جارى إعادة التوجيه...")
-      setTimeout(() => router.replace("/ar/rooms"), 1500)
+      setTimeout(() => router.replace("/ar"), 1500)
     }
   }
 

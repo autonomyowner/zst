@@ -1,6 +1,8 @@
-# Quick Start Guide
+# ZST Marketplace - Quick Start Guide
 
 ## Get Up and Running in 5 Minutes
+
+This guide will help you set up the ZST Marketplace development environment quickly.
 
 ### Step 1: Apply Database Schema (2 minutes)
 
@@ -35,37 +37,55 @@ npm run dev
 
 ### Step 4: Test It Out!
 
+**Test B2C Shopping (Public)**:
 1. Open http://localhost:3000
-2. Click **Sign up** in the header
-3. Create an account with your email
-4. Check your email for confirmation link
-5. Click the link to confirm
-6. Navigate to **Rooms** in the header
-7. Click **Create Room**
-8. Fill in room details and create
-9. You'll be taken to the voice room!
+2. Browse products on the homepage
+3. Click on a product to see details
+4. Click **Checkout** and fill in your information
+5. Complete a Cash-on-Delivery order
+
+**Test B2B Business Portal**:
+1. Navigate to http://localhost:3000/business/signup
+2. Create a business account (choose your role: importer, wholesaler, or retailer)
+3. Check your email for confirmation link
+4. Log in at http://localhost:3000/business/login
+5. Go to **My Listings** to create products for sale
+6. Go to **Dashboard** to see available products to purchase (based on your role)
+
+**Test Admin Panel**:
+1. Sign up normally, then manually update your profile in Supabase:
+   - Go to Supabase Dashboard → Table Editor → profiles
+   - Find your user and set `role = 'admin'`
+2. Visit http://localhost:3000/admin/dashboard
+3. Manage users, products, categories, and orders
 
 ---
 
 ## What You Just Set Up
 
 ### Authentication ✅
-- Email/password signup
-- Magic link login
-- OAuth (Google, GitHub)
-- Session persistence
+- Email/password signup and login
+- OAuth providers (Google, GitHub - optional)
+- Role-based access control (importer, wholesaler, retailer, admin)
+- Session persistence with Supabase Auth
 
-### Room Management ✅
-- Create voice rooms
-- List your rooms
-- Join rooms
-- Room ownership tracking
+### B2C E-commerce ✅
+- Public product browsing
+- Product detail pages
+- Cash-on-Delivery checkout
+- Order tracking
 
-### Voice Chat ✅
-- LiveKit integration
-- High-quality audio
-- Noise suppression
-- Echo cancellation
+### B2B Business Portal ✅
+- Hierarchical product visibility (based on user role)
+- Create and manage product listings
+- Order placement between business tiers
+- Business dashboard with analytics
+
+### Admin Panel ✅
+- User management (view, edit roles)
+- Product and category management
+- Order management (B2C and B2B)
+- Platform statistics dashboard
 
 ---
 
@@ -89,11 +109,17 @@ npm run build
 
 ## URLs to Bookmark
 
-- **Local App**: http://localhost:3000
-- **Supabase Dashboard**: https://supabase.com/dashboard/project/wwvqkgnqcplzsxvlthib
-- **Signup Page**: http://localhost:3000/signup
-- **Login Page**: http://localhost:3000/login
-- **Rooms Page**: http://localhost:3000/rooms
+### Local Development
+- **B2C Homepage**: http://localhost:3000
+- **Business Signup**: http://localhost:3000/business/signup
+- **Business Login**: http://localhost:3000/business/login
+- **Business Dashboard**: http://localhost:3000/business/dashboard
+- **My Listings**: http://localhost:3000/business/my-listings
+- **Admin Dashboard**: http://localhost:3000/admin/dashboard
+- **Arabic Homepage**: http://localhost:3000/ar
+
+### External Services
+- **Supabase Dashboard**: https://supabase.com/dashboard/project/ukkgmqvappkeqgdrbsar
 
 ---
 
@@ -107,15 +133,17 @@ npm run build
 - Check spam folder
 - Verify email settings in Supabase > Authentication > Email Templates
 
-**Room creation fails?**
-- Make sure you're logged in
+**Listing creation fails?**
+- Make sure you're logged in to a business account
 - Check browser console for errors
-- Verify schema includes rooms table
+- Verify schema includes listings and products tables
+- Ensure you have a valid role (importer, wholesaler, or retailer)
 
-**Voice not working?**
-- Check microphone permissions
-- Verify LiveKit credentials in .env.local
-- Test with a different browser
+**Can't see products in dashboard?**
+- Check that listings have the correct target_role for your account
+- Importers cannot buy (they only sell to wholesalers)
+- Wholesalers see products from importers
+- Retailers see products from wholesalers
 
 ---
 
@@ -139,12 +167,13 @@ Check these files for detailed information:
 
 ## You're All Set! 🎉
 
-Your TRAVoices app is now configured with:
-- ✅ Full authentication system
-- ✅ Room management
-- ✅ Voice chat capabilities
-- ✅ Secure database with RLS
-- ✅ Beautiful UI
+Your ZST Marketplace is now configured with:
+- ✅ Full authentication system with role-based access
+- ✅ B2C e-commerce with COD checkout
+- ✅ B2B business portal with hierarchical marketplace
+- ✅ Admin panel for platform management
+- ✅ Secure database with Row Level Security (RLS)
+- ✅ Multi-language support (English/Arabic)
 
-Start creating rooms and collaborating!
+Start selling and trading!
 

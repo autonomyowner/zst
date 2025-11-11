@@ -1,10 +1,11 @@
-# Deployment Guide: NeuroCanvas to Vercel & Supabase
+# Deployment Guide: ZST Marketplace to Vercel & Supabase
 
 ## Prerequisites
-- Your GitHub repository is now up to date with the latest changes
+- Your GitHub repository is up to date with the latest changes
 - You need a Vercel account (sign up at https://vercel.com)
 - You need a Supabase account (sign up at https://supabase.com)
-- You need a LiveKit account (sign up at https://livekit.io)
+
+**Note**: The Express server in `apps/server/` contains legacy code and is not required for the ZST Marketplace deployment.
 
 ---
 
@@ -26,11 +27,12 @@
 3. Copy and paste the entire contents from your local file: `supabase/schema.sql`
 4. Click **"Run"** to execute the SQL
 5. Verify: Go to **Table Editor** and you should see these tables:
-   - `users`
-   - `maps`
-   - `versions`
-   - `templates`
-   - `rooms`
+   - `profiles`
+   - `categories`
+   - `products`
+   - `listings`
+   - `orders_b2c`, `order_items_b2c`
+   - `orders_b2b`, `order_items_b2b`
 
 ### 3. Get Your Supabase Credentials
 1. Go to **Project Settings** (gear icon at bottom left)
@@ -49,30 +51,21 @@
    - Site URL: `http://localhost:3000` (temporary)
    - Redirect URLs: `http://localhost:3000/auth/callback` (temporary)
 
----
-
-## Part 2: LiveKit Setup (for Voice Calls)
-
-### 1. Create a LiveKit Cloud Account
-1. Go to https://cloud.livekit.io/
-2. Sign up or log in
-3. Create a new project
-
-### 2. Get Your LiveKit Credentials
-1. Go to your project settings
-2. Copy these values:
-   - **WebSocket URL** (e.g., wss://xxxxx.livekit.cloud)
-   - **API Key**
-   - **API Secret**
+### 5. Set Up Storage (for Product Images)
+1. Go to **Storage** in the left sidebar
+2. Click **"New bucket"**
+3. Create a bucket named: `product_images`
+4. Set it as **Public bucket**
+5. Apply the storage policies from `supabase/storage_policies.sql` in SQL Editor
 
 ---
 
-## Part 3: Vercel Deployment
+## Part 2: Vercel Deployment
 
 ### 1. Deploy the Client App
 1. Go to https://vercel.com/dashboard
 2. Click **"Add New..."** > **"Project"**
-3. Import your GitHub repository: `autonomyowner/Travoicephase3`
+3. Import your GitHub repository
 4. Click **"Import"**
 
 ### 2. Configure Build Settings
@@ -110,19 +103,14 @@ Click on **"Environment Variables"** and add these:
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# LiveKit (from Part 2, Step 2)
-NEXT_PUBLIC_LIVEKIT_URL=wss://xxxxx.livekit.cloud
-LIVEKIT_API_KEY=your_livekit_api_key
-LIVEKIT_API_SECRET=your_livekit_api_secret
-
-# API Base URL (Optional - for server API if deployed separately)
-NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+# Revalidation (for ISR on-demand revalidation)
+REVALIDATION_SECRET=your_random_secret_string
 ```
 
 **Important Notes:**
 - Variables starting with `NEXT_PUBLIC_` are exposed to the browser
-- `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET` are server-side only
-- For `NEXT_PUBLIC_API_BASE_URL`: Leave as localhost for now or deploy the server separately
+- Generate a strong random string for `REVALIDATION_SECRET`
+- The Express server is not required for ZST Marketplace
 
 ### 4. Deploy
 1. Click **"Deploy"**
@@ -143,72 +131,51 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
 
 ---
 
-## Part 4: Deploy the Server (Optional - for AI features)
-
-### Option A: Deploy to Vercel as a separate project
-
-1. Create a new Vercel project
-2. Import the same GitHub repository
-3. Set **Root Directory** to: `apps/server`
-4. Add environment variables:
-   ```bash
-   # Supabase
-   SUPABASE_URL=https://xxxxx.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   
-   # OpenRouter API (for AI)
-   OPENROUTER_API_KEY=your_openrouter_api_key
-   
-   # Port
-   PORT=4000
-   ```
-5. Deploy and copy the URL
-6. Go back to your **client** project on Vercel
-7. Update the `NEXT_PUBLIC_API_BASE_URL` environment variable with the server URL
-8. Redeploy the client
-
-### Option B: Deploy to Railway, Render, or Fly.io
-
-Similar steps, but configure the platform-specific settings accordingly.
-
----
-
-## Part 5: Verify Deployment
+## Part 3: Verify Deployment
 
 ### Test Core Features:
 
-1. **Landing Page**: Visit `https://your-project.vercel.app`
-   - Should load the homepage
+1. **B2C Homepage**: Visit `https://your-project.vercel.app`
+   - Should load with product listings
+   - Browse products and categories
 
-2. **Authentication**:
-   - Click "Sign Up" or "Login"
-   - Create an account
+2. **B2C Checkout**:
+   - Click on a product
+   - Add to cart and proceed to checkout
+   - Complete a Cash-on-Delivery order
+
+3. **Authentication**:
+   - Go to `/business/signup`
+   - Create a business account (choose role: importer, wholesaler, or retailer)
    - Verify email authentication works
 
-3. **Mind Maps**:
-   - After login, test creating a mind map
-   - Test voice-to-text features (if server is deployed)
+4. **Business Dashboard**:
+   - Login at `/business/login`
+   - Check that dashboard shows appropriate products based on role
+   - Go to "My Listings" and create a product listing
+   - Upload a product image
 
-4. **Voice Rooms**:
-   - Go to "Rooms" page
-   - Create a new room
-   - Test joining the room
-   - Test audio connection
+5. **Admin Panel**:
+   - Manually set a user to admin role in Supabase
+   - Visit `/admin/dashboard`
+   - Test user, product, and order management
 
-5. **Database**:
+6. **Database & Storage**:
    - Go to Supabase Dashboard > Table Editor
-   - Check that data is being saved in tables
+   - Check that data is being saved (profiles, listings, orders)
+   - Go to Storage and verify product images are uploaded
 
 ---
 
-## Part 6: Custom Domain (Optional)
+## Part 4: Custom Domain (Optional)
 
 ### Add a Custom Domain in Vercel:
 1. Go to your project settings in Vercel
 2. Click **"Domains"**
-3. Add your domain (e.g., `neurocanvas.com`)
+3. Add your domain (e.g., `zstmarketplace.com`)
 4. Follow DNS configuration instructions
 5. Update Supabase redirect URLs with the new domain
+6. Update `next.config.ts` if using a different Supabase project URL for images
 
 ---
 
@@ -223,33 +190,41 @@ Similar steps, but configure the platform-specific settings accordingly.
 - Verify Supabase URL and keys are correct
 - Check that redirect URLs are properly configured in Supabase
 - Ensure the Site URL matches your deployed domain
+- Check that `auth.users` trigger creates profiles automatically
 
-### LiveKit/Voice Issues:
-- Verify LiveKit credentials are correct
-- Check browser console for WebSocket errors
-- Ensure LIVEKIT_API_SECRET is set (server-side only)
+### Image Upload Issues:
+- Verify storage bucket `product_images` is created and public
+- Check that storage policies allow authenticated uploads
+- Ensure `next.config.ts` has correct Supabase hostname in `remotePatterns`
+- Check browser console for CORS or upload errors
 
 ### Database Connection Issues:
 - Check Supabase service status
 - Verify the database schema was executed successfully
 - Check that Row Level Security (RLS) policies are enabled
+- Ensure `public.is_admin()` function exists (prevents RLS infinite recursion)
 
-### API/Server Issues:
-- Check that NEXT_PUBLIC_API_BASE_URL points to the correct server
-- Verify server environment variables are set
-- Check server logs for errors
+### Role-Based Access Issues:
+- Verify users have correct roles in profiles table
+- Check RLS policies allow proper access for each role
+- Test with different user roles (importer, wholesaler, retailer, admin)
 
 ---
 
 ## Post-Deployment Checklist
 
-- [ ] Landing page loads
-- [ ] Sign up/login works
+- [ ] B2C homepage loads with products
+- [ ] Product detail pages work
+- [ ] Checkout flow completes successfully
+- [ ] Business signup/login works
 - [ ] Email verification works
-- [ ] Can create mind maps
-- [ ] Can create voice rooms
-- [ ] Voice calls work
+- [ ] Business dashboard shows role-appropriate products
+- [ ] Can create product listings
+- [ ] Image uploads work to Supabase Storage
+- [ ] Admin panel accessible (with admin role)
+- [ ] Orders are saved to database
 - [ ] Data persists in Supabase
+- [ ] RLS policies enforce correct access
 - [ ] Custom domain configured (if applicable)
 - [ ] Monitoring set up (Vercel Analytics)
 
@@ -261,19 +236,10 @@ Similar steps, but configure the platform-specific settings accordingly.
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-NEXT_PUBLIC_LIVEKIT_URL=wss://xxxxx.livekit.cloud
-LIVEKIT_API_KEY=your_api_key
-LIVEKIT_API_SECRET=your_api_secret
-NEXT_PUBLIC_API_BASE_URL=https://your-server.vercel.app (optional)
+REVALIDATION_SECRET=your_random_secret
 ```
 
-### Server (if deployed separately):
-```bash
-SUPABASE_URL=https://xxxxx.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-OPENROUTER_API_KEY=your_openrouter_key
-PORT=4000
-```
+**Note**: The Express server in `apps/server/` is not required for ZST Marketplace deployment.
 
 ---
 
@@ -281,22 +247,25 @@ PORT=4000
 
 - **Vercel Docs**: https://vercel.com/docs
 - **Supabase Docs**: https://supabase.com/docs
-- **LiveKit Docs**: https://docs.livekit.io
 - **Next.js Docs**: https://nextjs.org/docs
+- **Tailwind CSS Docs**: https://tailwindcss.com/docs
 
 ---
 
 ## Next Steps After Deployment
 
 1. **Monitor Usage**: Set up Vercel Analytics
-2. **Set Up Alerts**: Configure Supabase monitoring
+2. **Set Up Alerts**: Configure Supabase monitoring for database issues
 3. **Backup Database**: Set up automated backups in Supabase
-4. **Performance**: Optimize images and assets
-5. **SEO**: Add metadata and sitemap
-6. **Testing**: Run end-to-end tests on production
+4. **Performance**: Optimize images and enable Next.js Image Optimization
+5. **SEO**: Add metadata, Open Graph tags, and sitemap
+6. **Testing**: Test all user flows (B2C, B2B, Admin) on production
 7. **Documentation**: Update README with live URL
+8. **Payment Integration**: Add payment gateway (Stripe/PayPal) beyond COD
+9. **Email Notifications**: Set up transactional emails for orders
+10. **Analytics**: Add business analytics dashboard
 
 ---
 
-**Congratulations! Your NeuroCanvas app is now live!** 🎉
+**Congratulations! Your ZST Marketplace is now live!** 🎉
 

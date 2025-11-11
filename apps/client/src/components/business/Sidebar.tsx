@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/OptimizedAuthContext'
 import { formatDZD } from '@/lib/utils/currency'
 
 const platformName = process.env.NEXT_PUBLIC_PLATFORM_NAME || 'Silduez'
@@ -146,5 +146,6 @@ export default function Sidebar({ balance = 0, dueAmount = 0 }: SidebarProps) {
     </>
   )
 }
+
 
 

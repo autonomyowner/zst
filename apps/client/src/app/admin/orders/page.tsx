@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
+import { formatDZD } from "@/lib/utils/currency"
 import { isAdmin } from "@/lib/auth"
 import type { OrderB2C, OrderB2B, OrderB2CWithItems, OrderB2BWithItems } from "@/types/database"
 
@@ -117,7 +118,7 @@ export default function AdminOrdersPage() {
                 {order.items?.map((item) => (
                   <div key={item.id} className="flex justify-between text-xs sm:text-sm">
                     <span className="flex-1 min-w-0 pr-2">{item.listing?.product?.name} x {item.quantity}</span>
-                    <span className="flex-shrink-0">${item.price_at_purchase.toFixed(2)}</span>
+                    <span className="flex-shrink-0">{formatDZD(item.price_at_purchase)}</span>
                   </div>
                 ))}
               </div>
@@ -133,7 +134,7 @@ export default function AdminOrdersPage() {
                   <h3 className="font-semibold text-base sm:text-lg mb-1">Order #{order.id}</h3>
                   <p className="text-xs sm:text-sm text-gray-600">Buyer: {order.buyer?.business_name || order.buyer?.email}</p>
                   <p className="text-xs sm:text-sm text-gray-600">Seller: {order.seller?.business_name || order.seller?.email}</p>
-                  <p className="text-xs sm:text-sm font-semibold">Total: ${order.total_price.toFixed(2)}</p>
+                  <p className="text-xs sm:text-sm font-semibold">Total: {formatDZD(order.total_price)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <select
@@ -152,7 +153,7 @@ export default function AdminOrdersPage() {
                 {order.items?.map((item) => (
                   <div key={item.id} className="flex justify-between text-xs sm:text-sm">
                     <span className="flex-1 min-w-0 pr-2">{item.listing?.product?.name} x {item.quantity}</span>
-                    <span className="flex-shrink-0">${item.price_at_purchase.toFixed(2)}</span>
+                    <span className="flex-shrink-0">{formatDZD(item.price_at_purchase)}</span>
                   </div>
                 ))}
               </div>

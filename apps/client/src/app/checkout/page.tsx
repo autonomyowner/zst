@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
+import { formatDZD } from "@/lib/utils/currency"
 import type { ListingWithProduct } from "@/types/database"
 
 function CheckoutBody() {
@@ -273,14 +274,14 @@ function CheckoutBody() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-sm sm:text-base truncate">{listing.product.name}</h3>
                 <p className="text-xs sm:text-sm text-gray-600">Quantity: {quantity}</p>
-                <p className="text-base sm:text-lg font-bold">${listing.price.toFixed(2)}</p>
+                <p className="text-base sm:text-lg font-bold">{formatDZD(listing.price)}</p>
               </div>
             </div>
           </div>
           <div className="border-t pt-4">
             <div className="flex justify-between text-base sm:text-lg font-bold">
               <span>Total:</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{formatDZD(totalPrice)}</span>
             </div>
           </div>
         </div>

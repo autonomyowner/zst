@@ -203,6 +203,18 @@ begin
 end;
 $$ language plpgsql security definer;
 
+-- Helper function to check if current user is the seller of a listing
+-- This avoids circular RLS policy references
+create or replace function public.is_item_seller_accessible(listing_id_param bigint, user_id uuid)
+returns boolean as $$
+begin
+  return exists (
+    select 1 from public.listings
+    where id = listing_id_param and seller_id = user_id
+  );
+end;
+$$ language plpgsql security definer;
+
 -- RLS POLICIES FOR PROFILES
 -- Users can view and update their own profile
 -- Note: auth.uid() returns null if user is not authenticated, so we need to handle that
@@ -348,14 +360,11 @@ create policy order_items_b2c_admin_all on public.order_items_b2c
   for all using (public.is_admin());
 
 -- Sellers can select order items for listings they own
+-- Use a stored function to avoid circular reference issues with RLS
 drop policy if exists order_items_b2c_select_seller on public.order_items_b2c;
 create policy order_items_b2c_select_seller on public.order_items_b2c
   for select using (
-    exists (
-      select 1 from public.listings l
-      where l.id = order_items_b2c.listing_id
-      and l.seller_id = auth.uid()
-    )
+    public.is_item_seller_accessible(listing_id, auth.uid())
   );
 
 -- RLS POLICIES FOR ORDERS_B2B

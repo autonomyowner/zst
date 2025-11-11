@@ -1,7 +1,7 @@
 {
-  "name": "travoices",
+  "name": "zst-marketplace",
   "version": "1.0.0",
-  "description": "AI-powered real-time voice translation platform",
+  "description": "Multi-tier B2B/B2C e-commerce platform",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

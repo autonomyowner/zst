@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase, supabaseConfigured } from "@/lib/supabase"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/OptimizedAuthContext"
 import AuthLoadingSpinner from "@/components/AuthLoadingSpinner"
 
 function LoginBodyArabic() {
@@ -19,7 +19,7 @@ function LoginBodyArabic() {
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      const redirect = params.get("redirect") || "/ar/rooms"
+      const redirect = params.get("redirect") || "/ar"
       router.replace(redirect)
     }
   }, [user, authLoading, router, params])
@@ -30,7 +30,7 @@ function LoginBodyArabic() {
     // Prevent submission if already logged in
     if (user) {
       setStatus("أنت مسجل الدخول بالفعل! جارى إعادة التوجيه...")
-      const redirect = params.get("redirect") || "/ar/rooms"
+      const redirect = params.get("redirect") || "/ar"
       router.replace(redirect)
       return
     }
@@ -58,7 +58,7 @@ function LoginBodyArabic() {
       }
     } else if (data.session) {
       setStatus("✅ نجاح! جارى إعادة التوجيه...")
-      const redirect = params.get("redirect") || "/ar/rooms"
+      const redirect = params.get("redirect") || "/ar"
       setTimeout(() => {
         window.location.href = redirect
       }, 500)
@@ -67,7 +67,7 @@ function LoginBodyArabic() {
 
   const handleOAuth = async (provider: "google" | "github") => {
     if (user) {
-      const redirect = params.get("redirect") || "/ar/rooms"
+      const redirect = params.get("redirect") || "/ar"
       router.replace(redirect)
       return
     }
